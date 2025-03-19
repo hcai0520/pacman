@@ -77,23 +77,32 @@ void blink(){
 // these are the addresses for the interfaces as read off from the address editor of the block diagram in vivado
 #define ADDR_AXIL_REGS  0x40000000
 
-void check_reg_ro(){
-  xil_printf("Reg0 -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF10C));
+void check_reg_read(){
+  xil_printf("Scratch A   -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF100));
+  xil_printf("Scratch B   -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF104));
+  xil_printf("Status      -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF108));
+  xil_printf("Read-Only A -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF10C));
+  xil_printf("Read-Only B -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF110));
 }
 
-void check_reg_rw(){
+void check_reg_write(){
   static unsigned count=0;
 
   xil_printf("Count is 0x%x  \r\n", count);
 
   if ((count % 2)){
-    //Xil_Out32(ADDR_AXIL_REGS+0xFF00, 0x0);
-    //Xil_Out32(ADDR_AXIL_REGS+0x0000, 0x0);
+    Xil_Out32(ADDR_AXIL_REGS+0xF100, 0x0);
+    // xil_printf("Reg0 -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF10C));
+
+    //  Xil_Out32(ADDR_AXIL_REGS+0xF110, 0x0);
   } else {
-    //Xil_Out32(ADDR_AXIL_REGS+0xFF00, 0xAAAA1111);
-    //Xil_Out32(ADDR_AXIL_REGS+0x0000, 0xBBBB2222);
+    Xil_Out32(ADDR_AXIL_REGS+0xF100, 0xAAAA1111);
+    //xil_printf("Reg0 -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF10C));
+
+    // Xil_Out32(ADDR_AXIL_REGS+0xF110, 0xBBBB2222);
   }
-  //Xil_Out32(ADDR_AXIL_REGS+0xFF04, 0xDDDD0000 + count);
+    Xil_Out32(ADDR_AXIL_REGS+0xF104, 0xDDDD0000 + count);
+    //  xil_printf("Reg0 -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF110));
 
   count = (count + 1)&0xF;
 }
@@ -111,7 +120,7 @@ int main(){
     xil_printf("choose an option:\r\n");
     xil_printf("(1) blink LEDS \r\n");
     xil_printf("(2) read registers \r\n");
-    xil_printf("(3) read/write registers \r\n");
+    xil_printf("(3) write registers \r\n");
 
     unsigned char c=inbyte();
     xil_printf("pressed:  %c\n\r", c);
@@ -120,10 +129,10 @@ int main(){
       blink();
       break;
     case '2':
-      check_reg_ro();
+      check_reg_read();
       break;
     case '3':
-      check_reg_rw();
+      check_reg_write();
       break;
     default:
       xil_printf("invalid selection...\n\r");
