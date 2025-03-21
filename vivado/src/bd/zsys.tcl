@@ -46,7 +46,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following 
 # module references:
-# axil_to_regbus, registers_scratch, hello_pin
+# axil_to_regbus, hello_pin, lemo_demo
 
 # Please add the sources of those modules before sourcing this Tcl script.
 
@@ -167,8 +167,8 @@ set bCheckModules 1
 if { $bCheckModules == 1 } {
    set list_check_mods "\ 
 axil_to_regbus\
-registers_scratch\
 hello_pin\
+lemo_demo\
 "
 
    set list_mods_missing ""
@@ -563,17 +563,6 @@ proc create_root_design { parentCell } {
   # Create instance: rst_ps7_0_100M, and set properties
   set rst_ps7_0_100M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ps7_0_100M ]
 
-  # Create instance: registers_scratch_0, and set properties
-  set block_name registers_scratch
-  set block_cell_name registers_scratch_0
-  if { [catch {set registers_scratch_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $registers_scratch_0 eq "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
   # Create instance: hello_pin_0, and set properties
   set block_name hello_pin
   set block_cell_name hello_pin_0
@@ -585,8 +574,19 @@ proc create_root_design { parentCell } {
      return 1
    }
   
+  # Create instance: lemo_demo_0, and set properties
+  set block_name lemo_demo
+  set block_cell_name lemo_demo_0
+  if { [catch {set lemo_demo_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $lemo_demo_0 eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
   # Create interface connections
-  connect_bd_intf_net -intf_net axil_to_regbus_0_P_REGBUS [get_bd_intf_pins axil_to_regbus_0/P_REGBUS] [get_bd_intf_pins registers_scratch_0/S_REGBUS]
+  connect_bd_intf_net -intf_net axil_to_regbus_0_P_REGBUS [get_bd_intf_pins axil_to_regbus_0/P_REGBUS] [get_bd_intf_pins lemo_demo_0/S_REGBUS]
   connect_bd_intf_net -intf_net processing_system7_0_DDR [get_bd_intf_ports DDR] [get_bd_intf_pins processing_system7_0/DDR]
   connect_bd_intf_net -intf_net processing_system7_0_FIXED_IO [get_bd_intf_ports FIXED_IO] [get_bd_intf_pins processing_system7_0/FIXED_IO]
   connect_bd_intf_net -intf_net processing_system7_0_IIC_1 [get_bd_intf_pins SC0720_0/EMIO_I2C1] [get_bd_intf_pins processing_system7_0/IIC_1]
@@ -607,11 +607,11 @@ proc create_root_design { parentCell } {
   connect_bd_net -net SC0720_0_PL_pin_K20 [get_bd_pins SC0720_0/PL_pin_K20] [get_bd_ports PL_pin_K20]
   connect_bd_net -net SC0720_0_PL_pin_L16 [get_bd_pins SC0720_0/PL_pin_L16] [get_bd_ports PL_pin_L16]
   connect_bd_net -net SC0720_0_PL_pin_N22 [get_bd_pins SC0720_0/PL_pin_N22] [get_bd_ports PL_pin_N22]
-  connect_bd_net -net hello_pin_0_OUT_A [get_bd_pins hello_pin_0/OUT_A] [get_bd_ports LED_W16]
   connect_bd_net -net hello_pin_0_OUT_B [get_bd_pins hello_pin_0/OUT_B] [get_bd_ports LED_Y16]
-  connect_bd_net -net processing_system7_0_FCLK_CLK0 [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins processing_system7_0/S_AXI_HP0_ACLK] [get_bd_pins vio_0/clk] [get_bd_pins ps7_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps7_0_100M/slowest_sync_clk] [get_bd_pins axil_to_regbus_0/S_AXI_ACLK] [get_bd_pins ps7_0_axi_periph/M00_ACLK] [get_bd_pins ps7_0_axi_periph/ACLK] [get_bd_pins registers_scratch_0/ACLK]
+  connect_bd_net -net lemo_demo_0_LED_Select [get_bd_pins lemo_demo_0/LED_Select] [get_bd_ports LED_W16]
+  connect_bd_net -net processing_system7_0_FCLK_CLK0 [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins processing_system7_0/S_AXI_HP0_ACLK] [get_bd_pins vio_0/clk] [get_bd_pins ps7_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps7_0_100M/slowest_sync_clk] [get_bd_pins axil_to_regbus_0/S_AXI_ACLK] [get_bd_pins ps7_0_axi_periph/M00_ACLK] [get_bd_pins ps7_0_axi_periph/ACLK] [get_bd_pins lemo_demo_0/ACLK]
   connect_bd_net -net processing_system7_0_FCLK_RESET0_N [get_bd_pins processing_system7_0/FCLK_RESET0_N] [get_bd_pins rst_ps7_0_100M/ext_reset_in]
-  connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn [get_bd_pins rst_ps7_0_100M/peripheral_aresetn] [get_bd_pins ps7_0_axi_periph/S00_ARESETN] [get_bd_pins axil_to_regbus_0/S_AXI_ARESETN] [get_bd_pins ps7_0_axi_periph/M00_ARESETN] [get_bd_pins ps7_0_axi_periph/ARESETN] [get_bd_pins registers_scratch_0/ARESETN]
+  connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn [get_bd_pins rst_ps7_0_100M/peripheral_aresetn] [get_bd_pins ps7_0_axi_periph/S00_ARESETN] [get_bd_pins axil_to_regbus_0/S_AXI_ARESETN] [get_bd_pins ps7_0_axi_periph/M00_ARESETN] [get_bd_pins ps7_0_axi_periph/ARESETN] [get_bd_pins lemo_demo_0/ARESETN]
 
   # Create address segments
   assign_bd_address -offset 0x40000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces processing_system7_0/Data] [get_bd_addr_segs axil_to_regbus_0/S_AXI/reg0] -force

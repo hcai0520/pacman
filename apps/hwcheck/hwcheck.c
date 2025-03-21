@@ -78,30 +78,36 @@ void blink(){
 #define ADDR_AXIL_REGS  0x40000000
 
 void check_reg_read(){
-  xil_printf("Scratch A   -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF100));
-  xil_printf("Scratch B   -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF104));
-  xil_printf("Status      -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF108));
-  xil_printf("Read-Only A -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF10C));
-  xil_printf("Read-Only B -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF110));
+  xil_printf("Scratch     -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF100));
+  xil_printf("Config      -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF104));
+  xil_printf("Status(Read Only)      -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF108));
+  xil_printf("Counter(Read Only)     -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF10C));
+  xil_printf("Brate -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF110));
+  xil_printf("Bhold -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF114));
+
 }
 
 void check_reg_write(){
   static unsigned count=0;
 
   xil_printf("Count is 0x%x  \r\n", count);
-
-  if ((count % 2)){
-    Xil_Out32(ADDR_AXIL_REGS+0xF100, 0x0);
+  Xil_Out32(ADDR_AXIL_REGS+0xF100,0x0);
+  Xil_Out32(ADDR_AXIL_REGS+0xF104,0x00000003);
+ 
+  Xil_Out32(ADDR_AXIL_REGS+0xF110,0x08000000);
+  Xil_Out32(ADDR_AXIL_REGS+0xF114,0x04000000);
+  //if ((count % 2)){
+   // Xil_Out32(ADDR_AXIL_REGS+0xF100, 0x0);
     // xil_printf("Reg0 -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF10C));
 
     //  Xil_Out32(ADDR_AXIL_REGS+0xF110, 0x0);
-  } else {
-    Xil_Out32(ADDR_AXIL_REGS+0xF100, 0xAAAA1111);
+  //} else {
+   // Xil_Out32(ADDR_AXIL_REGS+0xF100, 0xAAAA1111);
     //xil_printf("Reg0 -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF10C));
 
-    // Xil_Out32(ADDR_AXIL_REGS+0xF110, 0xBBBB2222);
-  }
-    Xil_Out32(ADDR_AXIL_REGS+0xF104, 0xDDDD0000 + count);
+    // Xil_Out32(ADDR_AXIL_REGS+0xF110, 0xBBBB2222;
+ // }
+  //  Xil_Out32(ADDR_AXIL_REGS+0xF104, 0xDDDD0000 + count);
     //  xil_printf("Reg0 -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF110));
 
   count = (count + 1)&0xF;
@@ -137,6 +143,15 @@ int main(){
     default:
       xil_printf("invalid selection...\n\r");
     }
-  }
-  return 0;
-}
+   }
+    return 0;
+  } 
+
+
+
+
+
+
+
+
+
