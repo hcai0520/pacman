@@ -13,8 +13,7 @@ entity lemo_demo is
     C_REG_STAT    : integer  := 16#8#;
     C_REG_COUNT   : integer  := 16#C#;
     C_REG_BRATE   : integer  := 16#10#;
-    C_REG_BHOLD   : integer  := 16#14#;
-    C_VAL_STAT    : unsigned(31 downto 0)  := x"1000F001"
+    C_REG_BHOLD   : integer  := 16#14#
     --C_VAL_ROA     : unsigned(31 downto 0)  := x"11111111";
     -- C_VAL_ROB     : unsigned(31 downto 0)  := x"22222222"
     );      
@@ -33,7 +32,7 @@ entity lemo_demo is
     S_REGBUS_RB_WACK    : out  std_logic;
     
     LED_Select           : out std_logic;
-    LEMO_Drive          : out std_logic;
+    LEMO_Drive          : in std_logic;
 
     DEBUG               : out  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)
     );
@@ -91,10 +90,7 @@ begin
   waddr    <= S_REGBUS_RB_WADDR;
   wdata    <= S_REGBUS_RB_WDATA;
 
-  stat <= std_logic_vector(C_VAL_STAT);
-
-
-
+  stat(0) <= LEMO_Drive;
 
  --mode 
 
@@ -260,7 +256,6 @@ begin
   end process;
 
   LED_Select <=led_enable and led_switch;
-  LEMO_Drive <=lemo_enable;
 end; 
 
 

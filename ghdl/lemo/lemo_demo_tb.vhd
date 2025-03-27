@@ -30,7 +30,7 @@ architecture behaviour of lemo_demo_tb is
 
 
       LED_Select             : out std_logic;
-      LEMO_Drive             : out std_logic
+      LEMO_Drive             : in  std_logic
       );
   end component;
 
@@ -41,7 +41,6 @@ architecture behaviour of lemo_demo_tb is
 
  --drive
   signal led    : std_logic;
-  signal lemo   : std_logic;
   -- read signals:
   signal raddr   : std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0) := (others => '0');
   signal rupdate : std_logic := '0';
@@ -66,8 +65,7 @@ begin
       S_REGBUS_RB_WACK    => wack,
 
       LED_Select => led,
-      LEMO_Drive => lemo
-      
+      LEMO_Drive => '1'      
       );
   
   aresetn_process : process
@@ -188,8 +186,6 @@ begin
     write (l, wack);
     write (l, String'(" led:"));
     write (l, led);
-    write (l, String'(" lemo:"));
-    write (l, lemo);
     if (aresetn = '0') then
       write (l, String'(" (RESET)"));
     end if;
