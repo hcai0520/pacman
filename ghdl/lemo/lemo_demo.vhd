@@ -14,7 +14,7 @@ entity lemo_demo is
     C_REG_COUNT   : integer  := 16#C#;
     C_REG_BRATE   : integer  := 16#10#;
     C_REG_BHOLD   : integer  := 16#14#;
-    C_VAL_STAT    : unsigned(31 downto 0)  := x"1000F001"
+    C_REG_LCOUNT   : integer  := 16#18#
     --C_VAL_ROA     : unsigned(31 downto 0)  := x"11111111";
     -- C_VAL_ROB     : unsigned(31 downto 0)  := x"22222222"
     );      
@@ -32,8 +32,8 @@ entity lemo_demo is
     S_REGBUS_RB_WDATA	  : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
     S_REGBUS_RB_WACK    : out  std_logic;
     
-    LED_Select           : out std_logic;
-    LEMO_Drive          : out std_logic;
+    LED_Drive           : out std_logic;
+    LEMO                : in std_logic;
 
     DEBUG               : out  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)
     );
@@ -62,17 +62,17 @@ architecture behavioral of lemo_demo is
 
 
   -- registers
-  signal scr         : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
+  signal scr             : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
 
-  signal stat        : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
+  signal stat            : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
 
-  signal counter     : integer :=0;
-  -- signal counter_clk : std_logic_vector(8 downto 0) := (others => '0');
-  signal config      : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
-  signal brate       : integer :=0;
-  signal bhold       : integer :=0;
-
-  
+  signal counter_led     : integer :=0;
+  signal config          : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
+  signal brate           : integer :=0;
+  signal bhold           : integer :=0;
+  signal counter_lemo    : integer :=0;
+  signal meta            : std_logic;
+  signal stat_old        : std_logic;
 begin
   DEBUG <= scr;
   clk <= ACLK;
@@ -91,12 +91,9 @@ begin
   waddr    <= S_REGBUS_RB_WADDR;
   wdata    <= S_REGBUS_RB_WDATA;
 
-  stat <= std_logic_vector(C_VAL_STAT);
+  
 
-
-
-
- --mode 
+  --mode 
 
   process(clk,rst) 
   begin
@@ -122,7 +119,7 @@ begin
   begin
     if (rst = '1') then
       count := 0;
-      counter <=1;
+      counter_led <=0;
       led_switch <= '0';
     else
       if(rising_edge(clk)) then
@@ -141,11 +138,10 @@ begin
             end if; 
 
             if (count = 0) then
-              count := 0;
-              if (counter = 10000000 -1 ) then
-                counter <=0;
+              if (counter_led = 10000000 -1 ) then
+                counter_led <=0;
               else  
-                counter <= counter + 1;
+                counter_led <= counter_led + 1;
               end if;  
             end if;
   
@@ -153,6 +149,34 @@ begin
       end if;  
     end if;
   end process;
+
+  --lemo
+  process(clk,rst)  
+  begin
+    if (rst = '1') then
+      counter_lemo <=0;
+      stat_old <= '0';
+    else
+      if(rising_edge(clk)) then
+        if (lemo_enable = '1') then        
+            meta    <= LEMO;
+            stat(0) <= meta;
+            stat_old   <= stat(0);
+            
+            if (stat_old = '0' and stat(0) = '1') then
+              if (counter_lemo = 10000000 -1 ) then
+                counter_lemo <=0;
+              else
+                counter_lemo <= counter_lemo + 1;
+              end if;
+            end if;  
+        end if;
+      end if;  
+    end if;
+  end process;
+
+
+
 
 
 
@@ -185,12 +209,11 @@ begin
               rdata <= stat;
               rack  <= '1';  
             elsif (reg=C_REG_COUNT) then
-              if (led_switch = '1') then
-                rdata <= std_logic_vector(to_signed(counter + 1 ,32));
-              else 
-                rdata <= std_logic_vector(to_signed(counter  ,32));  
-              end if;  
-              rack  <= '1';    
+                rdata <= std_logic_vector(to_signed(counter_led + 1 ,32));
+              rack  <= '1'; 
+            elsif (reg=C_REG_LCOUNT) then
+                rdata <= std_logic_vector(to_signed(counter_lemo + 1 ,32));
+              rack  <= '1';      
             elsif (reg=C_REG_BRATE) then
               rdata <= std_logic_vector(to_signed(brate,32));
       
@@ -259,8 +282,5 @@ begin
     end if;   
   end process;
 
-  LED_Select <=led_enable and led_switch;
-  LEMO_Drive <=lemo_enable;
+  LED_Drive <=led_enable and led_switch;
 end; 
-
-

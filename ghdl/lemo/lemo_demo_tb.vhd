@@ -29,8 +29,8 @@ architecture behaviour of lemo_demo_tb is
       DEBUG                  : out  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
 
 
-      LED_Select             : out std_logic;
-      LEMO_Drive             : out std_logic
+      LED_Drive             : out std_logic;
+      LEMO                   : in std_logic
       );
   end component;
 
@@ -65,8 +65,8 @@ begin
       S_REGBUS_RB_WDATA   => wdata,
       S_REGBUS_RB_WACK    => wack,
 
-      LED_Select => led,
-      LEMO_Drive => lemo
+      LED_Drive => led,
+      LEMO => lemo
       
       );
   
@@ -88,40 +88,58 @@ begin
     wait for 5 ns;
   end process;
 
+  lemo_process : process
+  begin   
+    lemo   <= '1';
+    wait for 10 ns;
+    lemo  <= '0';
+    wait for 10 ns;
+    lemo  <= '1';
+    wait for 10 ns;
+    lemo  <= '0';
+    wait for 10 ns;
+    lemo  <= '1';
+    wait for 10 ns;
+    lemo  <= '0';
+    wait for 10 ns;
+    lemo  <= '1';
+    wait for 10 ns;
+    lemo  <= '0';
+    wait for 10 ns;
+  end process;  
+
   rapid_read_process : process
   begin
     raddr   <= x"0000";
     rupdate <= '0';
-    wait for 8 ns;
-    wait for 30 ns;
-    raddr   <= x"F110";
-    rupdate <= '1';
-    wait for 10 ns;
-    raddr   <= x"F114";
-    rupdate <= '1';
-    wait for 10 ns;
-    raddr   <= x"F108";
-    rupdate <= '1';
-    wait for 10 ns;
-    raddr   <= x"0000";
-    rupdate <= '0';
-    wait for 30 ns;
-    raddr   <= x"F100";
-    rupdate <= '1';    
+--    wait for 8 ns;
+--    wait for 30 ns;
+--    raddr   <= x"F110";
+--    rupdate <= '1';
+--    wait for 10 ns;
+--    raddr   <= x"F114";
+--    rupdate <= '1';
+--    wait for 10 ns;
+--    raddr   <= x"F108";
+--    rupdate <= '1';
+--    wait for 10 ns;
+--    raddr   <= x"0000";
+--    rupdate <= '0';
+--    wait for 30 ns;
+--    raddr   <= x"F100";
+--    rupdate <= '1';    
     wait for 10 ns;    
     raddr   <= x"F104";
     rupdate <= '1';    
-    wait for 10 ns; 
-  --  wait for 10 ns; 
-    wait for 10 ns;
-    raddr   <= x"F110";
-    rupdate <= '1';
-    wait for 10 ns;
-    raddr   <= x"F114";
-    rupdate <= '1';
-    wait for 10 ns; 
-
-    raddr   <= x"F10C";
+--    wait for 10 ns;  
+--    wait for 10 ns;
+--    raddr   <= x"F110";
+--    rupdate <= '1';
+--    wait for 10 ns;
+--    raddr   <= x"F114";
+--    rupdate <= '1';
+    wait for 30 ns; 
+    raddr   <= x"F118";
     rupdate <= '1'; 
     wait;
   end process;
