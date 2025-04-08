@@ -14,7 +14,8 @@ entity lemo_demo is
     C_REG_COUNT   : integer  := 16#C#;
     C_REG_BRATE   : integer  := 16#10#;
     C_REG_BHOLD   : integer  := 16#14#;
-    C_REG_LCOUNT   : integer  := 16#18#
+    C_REG_LCOUNT   : integer  := 16#18#;
+    C_REG_LRATE   : integer  := 16#1C#
     --C_VAL_ROA     : unsigned(31 downto 0)  := x"11111111";
     -- C_VAL_ROB     : unsigned(31 downto 0)  := x"22222222"
     );      
@@ -73,6 +74,8 @@ architecture behavioral of lemo_demo is
   signal counter_lemo    : integer :=0;
   signal meta            : std_logic;
   signal stat_old        : std_logic;
+  signal rate_lemo       : integer :=0;
+ 
 begin
   DEBUG <= scr;
   clk <= ACLK;
@@ -152,23 +155,42 @@ begin
 
   --lemo
   process(clk,rst)  
+  variable count   : integer :=0;
+  variable count_old   : integer :=0;
+  variable N :integer :=0;
   begin
     if (rst = '1') then
+      count := 0;
+      count_old :=0;
+      N := 0;
       counter_lemo <=0;
       stat_old <= '0';
     else
       if(rising_edge(clk)) then
+        if (count = 1000000000 -1 ) then
+          count :=0;
+        else
+          count := count + 1;
+        end if;
+        
         if (lemo_enable = '1') then        
             meta    <= LEMO;
             stat(0) <= meta;
             stat_old   <= stat(0);
             
             if (stat_old = '0' and stat(0) = '1') then
+
+              N := count - count_old;
+
+              if(N > 0) then
+                rate_lemo <= 100000000/N;
+              end if;
               if (counter_lemo = 10000000 -1 ) then
                 counter_lemo <=0;
               else
                 counter_lemo <= counter_lemo + 1;
               end if;
+              count_old := count;
             end if;  
         end if;
       end if;  
@@ -221,6 +243,9 @@ begin
             elsif (reg=C_REG_BHOLD) then
               rdata <= std_logic_vector(to_signed(bhold,32));
               rack  <= '1'; 
+            elsif (reg=C_REG_LRATE) then
+              rdata <= std_logic_vector(to_signed(rate_lemo,32));
+              rack  <= '1';   
             else
               -- this is an error, invalid register
               rdata <= x"EEEEEEEE";
@@ -268,6 +293,7 @@ begin
             elsif (reg=C_REG_BHOLD) then
               bhold<= to_integer(signed(wdata));
               wack  <= '1';
+              
             else
                 -- this is an error, invalid register
               wack  <= '0';
