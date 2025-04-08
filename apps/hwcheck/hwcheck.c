@@ -81,7 +81,8 @@ void check_reg_read(){
   xil_printf("Scratch     -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF100));
   xil_printf("Config      -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF104));
   xil_printf("Status(Read Only)      -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF108));
-  xil_printf("Counter(Read Only)     -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF10C));
+  xil_printf("Counter_LED(Read Only)     -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF10C));
+  xil_printf("Counter_LEMO(Read Only)     -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF118));
   xil_printf("Brate -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF110));
   xil_printf("Bhold -- 0x%x  \r\n", Xil_In32(ADDR_AXIL_REGS+0xF114));
 

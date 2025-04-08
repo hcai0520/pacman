@@ -582,7 +582,7 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net ps7_0_axi_periph_M00_AXI [get_bd_intf_pins ps7_0_axi_periph/M00_AXI] [get_bd_intf_pins axil_to_regbus_0/S_AXI]
 
   # Create port connections
-  connect_bd_net -net LEMO_Y16_1 [get_bd_ports LEMO_Y16] [get_bd_pins lemo_demo_0/LEMO_Drive]
+  connect_bd_net -net LEMO_Y16_1 [get_bd_ports LEMO_Y16] [get_bd_pins lemo_demo_0/LEMO]
   connect_bd_net -net PHY_LEDs [get_bd_pins xlconcat_0/dout] [get_bd_pins vio_0/probe_in0]
   connect_bd_net -net PL_pin_K16_1 [get_bd_ports PL_pin_K16] [get_bd_pins SC0720_0/PL_pin_K16]
   connect_bd_net -net PL_pin_K19_1 [get_bd_ports PL_pin_K19] [get_bd_pins SC0720_0/PL_pin_K19]
@@ -596,7 +596,7 @@ proc create_root_design { parentCell } {
   connect_bd_net -net SC0720_0_PL_pin_K20 [get_bd_pins SC0720_0/PL_pin_K20] [get_bd_ports PL_pin_K20]
   connect_bd_net -net SC0720_0_PL_pin_L16 [get_bd_pins SC0720_0/PL_pin_L16] [get_bd_ports PL_pin_L16]
   connect_bd_net -net SC0720_0_PL_pin_N22 [get_bd_pins SC0720_0/PL_pin_N22] [get_bd_ports PL_pin_N22]
-  connect_bd_net -net lemo_demo_0_LED_Select [get_bd_pins lemo_demo_0/LED_Select] [get_bd_ports LED_W16]
+  connect_bd_net -net lemo_demo_0_LED_Select [get_bd_pins lemo_demo_0/LED_Drive] [get_bd_ports LED_W16]
   connect_bd_net -net processing_system7_0_FCLK_CLK0 [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins processing_system7_0/S_AXI_HP0_ACLK] [get_bd_pins vio_0/clk] [get_bd_pins ps7_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps7_0_100M/slowest_sync_clk] [get_bd_pins axil_to_regbus_0/S_AXI_ACLK] [get_bd_pins ps7_0_axi_periph/M00_ACLK] [get_bd_pins ps7_0_axi_periph/ACLK] [get_bd_pins lemo_demo_0/ACLK]
   connect_bd_net -net processing_system7_0_FCLK_RESET0_N [get_bd_pins processing_system7_0/FCLK_RESET0_N] [get_bd_pins rst_ps7_0_100M/ext_reset_in]
   connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn [get_bd_pins rst_ps7_0_100M/peripheral_aresetn] [get_bd_pins ps7_0_axi_periph/S00_ARESETN] [get_bd_pins axil_to_regbus_0/S_AXI_ARESETN] [get_bd_pins ps7_0_axi_periph/M00_ARESETN] [get_bd_pins ps7_0_axi_periph/ARESETN] [get_bd_pins lemo_demo_0/ARESETN]
