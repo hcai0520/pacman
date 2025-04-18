@@ -15,7 +15,8 @@ entity lemo_demo is
     C_REG_BRATE   : integer  := 16#10#;
     C_REG_BHOLD   : integer  := 16#14#;
     C_REG_LCOUNT   : integer  := 16#18#;
-    C_REG_LRATE   : integer  := 16#1C#
+    C_REG_LRATE   : integer  := 16#1C#;
+    t_integer     : integer  := 1000000
     --C_VAL_ROA     : unsigned(31 downto 0)  := x"11111111";
     -- C_VAL_ROB     : unsigned(31 downto 0)  := x"22222222"
     );      
@@ -156,41 +157,41 @@ begin
   --lemo
   process(clk,rst)  
   variable count   : integer :=0;
-  variable count_old   : integer :=0;
-  variable N :integer :=0;
+--  variable count_old   : integer :=0;
+  variable count_p :integer :=0;
   begin
     if (rst = '1') then
-      count := 0;
-      count_old :=0;
-      N := 0;
+      rate_lemo <= 0;
       counter_lemo <=0;
       stat_old <= '0';
     else
       if(rising_edge(clk)) then
-        if (count = 1000000000 -1 ) then
+        if (count >= t_integer ) then
           count :=0;
         else
           count := count + 1;
         end if;
         
         if (lemo_enable = '1') then        
-            meta    <= LEMO;
-            stat(0) <= meta;
-            stat_old   <= stat(0);
+          meta    <= LEMO;
+          stat(0) <= meta;
+          stat_old   <= stat(0);
             
-            if (stat_old = '0' and stat(0) = '1') then
+          if (stat_old = '0' and stat(0) = '1') then
+            if (count >= t_integer ) then
+              rate_lemo <= count_p;
+              count_p :=0;
+            else
+              count_p := count_p +1 ;
 
-              N := count - count_old;
+            end if;
 
-              if(N > 0) then
-                rate_lemo <= 100000000/N;
-              end if;
               if (counter_lemo = 10000000 -1 ) then
                 counter_lemo <=0;
               else
                 counter_lemo <= counter_lemo + 1;
               end if;
-              count_old := count;
+--              count_old := count;
             end if;  
         end if;
       end if;  

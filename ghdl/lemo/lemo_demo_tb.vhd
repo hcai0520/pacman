@@ -103,9 +103,10 @@ begin
     lemo  <= '0';
     wait for 10 ns;
     lemo  <= '1';
-    wait for 10 ns;
+    wait for 20 ns;
     lemo  <= '0';
-    wait for 10 ns;
+    wait for 20 ns;
+    lemo  <= '1';
   end process;  
 
   rapid_read_process : process
@@ -140,6 +141,9 @@ begin
 --    rupdate <= '1';
     wait for 30 ns; 
     raddr   <= x"F118";
+    rupdate <= '1'; 
+     wait for 10 ns;
+    raddr   <= x"F11C";
     rupdate <= '1'; 
     wait;
   end process;
