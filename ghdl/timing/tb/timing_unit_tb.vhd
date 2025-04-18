@@ -16,7 +16,8 @@ architecture behaviour of timing_unit_tb is
       ACLK                 : in std_logic;
       ARESETN              : in std_logic;
       UCLK_I               : in  std_logic;    
-      
+      LEMO_A                : in std_logic;
+      LEMO_B                : in std_logic;
       S_REGBUS_RB_RADDR	 : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
       S_REGBUS_RB_RDATA	 : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
       S_REGBUS_RB_RUPDATE  : in  std_logic;
@@ -49,6 +50,8 @@ architecture behaviour of timing_unit_tb is
   signal wdata    : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
   signal wack     : std_logic := '0';
 
+  signal lemo_a  :  std_logic := '0';
+  signal lemo_b  :  std_logic := '0';
   -- dut outputs
   signal glb_clk   : std_logic;
   signal trig      : std_logic_vector(C_NUM_TILE-1 downto 0);
@@ -72,7 +75,9 @@ begin
     TIMESTAMP_O         => timestamp,
     GLB_CLK_O           => glb_clk,
     TRIG_O              => trig,
-    SYNC_O              => sync                        
+    SYNC_O              => sync,
+    LEMO_A              => lemo_a,
+    LEMO_B              => lemo_b                        
   );
 
   aresetn_process : process
@@ -100,6 +105,23 @@ begin
     wait for 50 ns;
   end process;
 
+  lemo_a_process : process
+  begin   
+    lemo_a   <= '0';
+    wait for 800 ns;
+    lemo_a  <= '1';
+    wait for 10 ns;
+    lemo_a   <= '0';
+    wait;
+  end process;  
+  
+  lemo_b_process : process
+  begin   
+    lemo_b   <= '0';
+    wait for 10 ns;
+    lemo_b  <= '0';
+    wait for 10 ns;
+  end process; 
   read_process : process
   begin
     raddr   <= x"0000";
@@ -146,7 +168,7 @@ begin
   show_output_process : process
   begin
     show_output<='1';
-    wait until (count=100);
+    wait until (count=200);
     wait for 10 ns;
     show_output<='0';
     wait;
@@ -156,12 +178,16 @@ begin
     variable l : line;
   begin
     --wait for 1 ns;
-    wait for 100 ns;
+    wait for 10 ns;
     if (show_output='1') then
       write (l, String'("c: "));
       write (l, count, left, 4);
       --write (l, String'("aclk: "));
       --write (l, aclk);
+      write (l, String'("lemo_a: "));
+      write (l, lemo_a);
+      write (l, String'("lemo_b: "));
+      write (l, lemo_b);
       write (l, String'(" | ra: 0x"));
       hwrite (l, raddr);
       write (l, String'(" ru:"));
