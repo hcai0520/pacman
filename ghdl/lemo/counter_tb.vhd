@@ -11,8 +11,8 @@ end counter_tb;
 architecture behaviour of counter_tb is
   component counter is
     port (
-      CLK          : in std_logic;
-      RESET      : in std_logic;
+      CLK             : in std_logic;
+      RESET           : in std_logic;
       Counter	        : out std_logic_vector(31 downto 0)   
       );
   end component;
@@ -21,8 +21,8 @@ architecture behaviour of counter_tb is
   signal counter    : std_logic_vector(31 downto 0);
 begin
   uut: counter port map (
-      CLK          => clk,
-      RESET       => reset,
+      CLK            => clk,
+      RESET          => reset,
       Counter        => counter
       );
   
