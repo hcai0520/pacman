@@ -7,32 +7,37 @@ use work.common.all;
 --  Defines a testbench (without any ports)
 entity timing_unit is
   port (
-    ACLK                 : in std_logic;
+    ACLK                 : in std_logic; -- fast clock
     ARESETN              : in std_logic;
-    UCLK_I               : in  std_logic;    
-    
-    S_REGBUS_RB_RADDR	 : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
-    S_REGBUS_RB_RDATA	 : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-    S_REGBUS_RB_RUPDATE  : in  std_logic;
-    S_REGBUS_RB_RACK     : out std_logic;
-    
-    S_REGBUS_RB_WUPDATE  : in  std_logic;
-    S_REGBUS_RB_WADDR	 : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
-    S_REGBUS_RB_WDATA	 : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-    S_REGBUS_RB_WACK     : out std_logic;
+    UCLK_I               : in std_logic; -- slow clock
 
-    TIMESTAMP_O          : out std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0);
-    GLB_CLK_O            : out std_logic;
-    TRIG_O               : out std_logic_vector(C_NUM_TILE-1 downto 0);
-    SYNC_O               : out std_logic_vector(C_NUM_TILE-1 downto 0)
+
+    --lemo in
+    LEMO_A                : in std_logic;
+    LEMO_B                : in std_logic;
+
+    S_REGBUS_RB_RADDR	    : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
+    S_REGBUS_RB_RDATA	    : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    S_REGBUS_RB_RUPDATE   : in  std_logic;
+    S_REGBUS_RB_RACK      : out std_logic;
+    
+    S_REGBUS_RB_WUPDATE   : in  std_logic;
+    S_REGBUS_RB_WADDR	    : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
+    S_REGBUS_RB_WDATA	    : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    S_REGBUS_RB_WACK      : out std_logic;
+
+    TIMESTAMP_O           : out std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0);
+    GLB_CLK_O             : out std_logic;
+    TRIG_O                : out std_logic_vector(C_NUM_TILE-1 downto 0);
+    SYNC_O                : out std_logic_vector(C_NUM_TILE-1 downto 0)
   );
 end timing_unit;
 
 architecture behaviour of timing_unit is
   component timing_registers is
     port (
-      ACLK	             : in std_logic;
-      ARESETN	             : in std_logic;
+      ACLK	                 : in std_logic;
+      ARESETN	               : in std_logic;
 
       S_REGBUS_RB_RADDR	     : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
       S_REGBUS_RB_RDATA	     : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
@@ -57,6 +62,19 @@ architecture behaviour of timing_unit is
       );
   end component;
 
+
+  component external_update is
+    port (
+     
+      UPDATE_E_I	        : in  std_logic;
+      CLK_B_I             : in  std_logic;
+      RSTN                : in  std_logic;
+      PULSE_OUT           : out std_logic;
+      COUNT_P             : out std_logic_vector(31 downto 0);
+      DEBUG               : out std_logic_vector(7 downto 0)
+    );
+  end component;
+
   component slow_broadcast is
     generic (
       constant C_ACTIVE : std_logic := '1';
@@ -65,11 +83,11 @@ architecture behaviour of timing_unit is
     );
     port (
       -- Clock Domain A: (Fast Clock)
-      CLK_A_I	        : in  std_logic;
-      RSTN_A_I	        : in  std_logic;
+      CLK_A_I	            : in  std_logic;
+      RSTN_A_I	          : in  std_logic;
       UPDATE_A_I	        : in  std_logic;
       CONFIG_A_I          : in  std_logic_vector(C_CONFIG_WIDTH-1 downto 0);
-      BUSY_A_O	        : out std_logic;
+      BUSY_A_O	          : out std_logic;
 
       -- Clock Domain B: (Slow Clock)
       CLK_B_I             : in  std_logic;
@@ -87,13 +105,13 @@ architecture behaviour of timing_unit is
     );
     port (
       -- Clock Domain A: (Fast Clock)
-      CLK_A_I	        : in  std_logic;
-      RSTN_A_I	        : in  std_logic;
-      TIMESTAMP_A_O       : out std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0);
+      CLK_A_I	             : in  std_logic;
+      RSTN_A_I	           : in  std_logic;
+      TIMESTAMP_A_O        : out std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0);
       -- Clock Domain B: (Slow Clock)
-      CLK_B_I             : in  std_logic;
-      RSTN_B_I            : in  std_logic;    
-      TIMESTAMP_B_O       : out std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0)
+      CLK_B_I              : in  std_logic;
+      RSTN_B_I             : in  std_logic;    
+      TIMESTAMP_B_O        : out std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0)
     );
   end component;
 
@@ -109,6 +127,12 @@ architecture behaviour of timing_unit is
 
   signal tstamp         : std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0);
   signal status         : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');  
+
+  signal trig_lemo_up   : std_logic;
+  signal sync_lemo_up   : std_logic;
+  signal trig_lemo_mux   : std_logic;
+  signal sync_lemo_mux  : std_logic;
+
 begin
 
   TIMESTAMP_O <= tstamp;
@@ -137,7 +161,7 @@ begin
     S_REGBUS_RB_WADDR   => S_REGBUS_RB_WADDR,   
     S_REGBUS_RB_WDATA   => S_REGBUS_RB_WDATA,   
     S_REGBUS_RB_WACK    => S_REGBUS_RB_WACK,
-    TRIG_UPDATE_O       => trig_update,
+    TRIG_UPDATE_O       => trig_update,      
     TRIG_CONFIG_O       => trig_config,
     TRIG_BUSY_I         => trig_busy,
     SYNC_UPDATE_O       => sync_update,
@@ -146,16 +170,36 @@ begin
     STATUS_I            => status,
     TIMESTAMP_I         => tstamp
   );
+ 
+  trig_lemo: external_update port map(
+      UPDATE_E_I	=> LEMO_A,
+      CLK_B_I     => ACLK,
+      RSTN       => ARESETN,
+      PULSE_OUT  => trig_lemo_up
+  );
+   
+  trig_lemo_mux <= trig_lemo_up or trig_update;
+
+
 
   trig0: slow_broadcast port map (
     CLK_A_I  => ACLK,
     RSTN_A_I  => ARESETN,
-    UPDATE_A_I => trig_update,
+    UPDATE_A_I => trig_lemo_mux,
     CONFIG_A_I => trig_config,
     BUSY_A_O => trig_busy,
     CLK_B_I => UCLK_I,
     BROADCAST_B_O => TRIG_O
   );
+
+   sync_lemo: external_update port map(
+      UPDATE_E_I	=> LEMO_B,
+      CLK_B_I     => ACLK,
+      RSTN       => ARESETN,
+      PULSE_OUT  => sync_lemo_up
+  );
+   sync_lemo_mux <= sync_lemo_up or sync_update;
+
 
   sync0: slow_broadcast
     generic map (
@@ -164,7 +208,7 @@ begin
     port map (
     CLK_A_I  => ACLK,
     RSTN_A_I  => ARESETN,
-    UPDATE_A_I => sync_update,
+    UPDATE_A_I => sync_lemo_mux,
     CONFIG_A_I => sync_config,
     BUSY_A_O => sync_busy,
     CLK_B_I => UCLK_I,
