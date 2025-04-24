@@ -43,6 +43,9 @@ architecture behaviour of timing_registers_tb is
       LEMO_A_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
       LEMO_B_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)     
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> efa1124 (modify data width)
+=======
 >>>>>>> efa1124 (modify data width)
 =======
 >>>>>>> efa1124 (modify data width)

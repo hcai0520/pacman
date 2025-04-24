@@ -131,12 +131,6 @@ architecture behaviour of timing_unit is
   signal tstamp         : std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0);
   signal status         : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');  
 
-<<<<<<< HEAD
-  signal trig_lemo_up   : std_logic;
-  signal sync_lemo_up   : std_logic;
-  signal trig_lemo_mux   : std_logic;
-  signal sync_lemo_mux  : std_logic;
-=======
   signal trig_lemo_update   : std_logic;
   signal sync_lemo_update   : std_logic;
   signal trig_lemo_mux      : std_logic;
@@ -144,10 +138,7 @@ architecture behaviour of timing_unit is
 
   signal lemo_a_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
   signal lemo_b_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-<<<<<<< HEAD
->>>>>>> efa1124 (modify data width)
-=======
->>>>>>> efa1124 (modify data width)
+
 
 begin
 
