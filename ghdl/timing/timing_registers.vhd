@@ -29,14 +29,10 @@ entity timing_registers is
     SYNC_BUSY_I         : in std_logic;
 
     STATUS_I            : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-<<<<<<< HEAD
-    TIMESTAMP_I         : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)    
-=======
     TIMESTAMP_I         : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);   
 
     LEMO_A_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
     LEMO_B_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)   
->>>>>>> efa1124 (modify data width)
     );
 end;
 
