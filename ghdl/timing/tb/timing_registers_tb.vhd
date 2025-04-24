@@ -37,8 +37,8 @@ architecture behaviour of timing_registers_tb is
       STATUS_I            : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
       TIMESTAMP_I         : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
 
-      LEMO_A_COUNT        : in  std_logic_vector(31 downto 0);
-      LEMO_B_COUNT        : in  std_logic_vector(31 downto 0)     
+      LEMO_A_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+      LEMO_B_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)     
     );
   end component;
 
@@ -63,8 +63,8 @@ architecture behaviour of timing_registers_tb is
   signal sync_config    : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
 
   --lemo_count
-  signal lemo_a_c       : std_logic_vector(31 downto 0) := (others => '0');
-  signal lemo_b_c       : std_logic_vector(31 downto 0) := (others => '0');
+  signal lemo_a_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
+  signal lemo_b_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
 
   signal show_output : std_logic := '0';
 begin

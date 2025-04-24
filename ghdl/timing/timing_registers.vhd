@@ -31,8 +31,8 @@ entity timing_registers is
     STATUS_I            : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
     TIMESTAMP_I         : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);   
 
-    LEMO_A_COUNT        : in  std_logic_vector(31 downto 0);
-    LEMO_B_COUNT        : in  std_logic_vector(31 downto 0)   
+    LEMO_A_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    LEMO_B_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)   
     );
 end;
 
