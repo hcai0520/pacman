@@ -58,7 +58,14 @@ architecture behaviour of timing_unit is
       SYNC_BUSY_I            : in std_logic;
 
       STATUS_I               : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+<<<<<<< HEAD
       TIMESTAMP_I            : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)    
+=======
+      TIMESTAMP_I            : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+
+      LEMO_A_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+      LEMO_B_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)    
+>>>>>>> efa1124 (modify data width)
       );
   end component;
 
@@ -70,7 +77,7 @@ architecture behaviour of timing_unit is
       CLK_B_I             : in  std_logic;
       RSTN                : in  std_logic;
       PULSE_OUT           : out std_logic;
-      COUNT_P             : out std_logic_vector(31 downto 0);
+      COUNT_P             : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
       DEBUG               : out std_logic_vector(7 downto 0)
     );
   end component;
@@ -128,10 +135,20 @@ architecture behaviour of timing_unit is
   signal tstamp         : std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0);
   signal status         : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');  
 
+<<<<<<< HEAD
   signal trig_lemo_up   : std_logic;
   signal sync_lemo_up   : std_logic;
   signal trig_lemo_mux   : std_logic;
   signal sync_lemo_mux  : std_logic;
+=======
+  signal trig_lemo_update   : std_logic;
+  signal sync_lemo_update   : std_logic;
+  signal trig_lemo_mux      : std_logic;
+  signal sync_lemo_mux      : std_logic;
+
+  signal lemo_a_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+  signal lemo_b_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+>>>>>>> efa1124 (modify data width)
 
 begin
 
