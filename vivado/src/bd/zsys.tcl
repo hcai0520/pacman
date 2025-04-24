@@ -258,6 +258,8 @@ proc create_root_design { parentCell } {
   set GLB_CLK_O_0 [ create_bd_port -dir O GLB_CLK_O_0 ]
   set TRIG_O_0 [ create_bd_port -dir O -from 9 -to 0 TRIG_O_0 ]
   set SYNC_O_0 [ create_bd_port -dir O -from 9 -to 0 SYNC_O_0 ]
+  set LEMO_A_0 [ create_bd_port -dir I LEMO_A_0 ]
+  set LEMO_B_0 [ create_bd_port -dir I LEMO_B_0 ]
 
   # Create instance: SC0720_0, and set properties
   set SC0720_0 [ create_bd_cell -type ip -vlnv trenz.biz:user:SC0720:1.0 SC0720_0 ]
@@ -685,6 +687,8 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net rx_unit_0_M_AXIS [get_bd_intf_pins rx_unit_0/M_AXIS] [get_bd_intf_pins axis_data_fifo_0/S_AXIS]
 
   # Create port connections
+  connect_bd_net -net LEMO_A_0_1 [get_bd_ports LEMO_A_0] [get_bd_pins timing_unit_0/LEMO_A]
+  connect_bd_net -net LEMO_B_0_1 [get_bd_ports LEMO_B_0] [get_bd_pins timing_unit_0/LEMO_B]
   connect_bd_net -net PHY_LEDs [get_bd_pins xlconcat_0/dout] [get_bd_pins vio_0/probe_in0]
   connect_bd_net -net PISO_I_0_1 [get_bd_ports PISO_I_0] [get_bd_pins rx_unit_0/PISO_I]
   connect_bd_net -net PL_pin_K16_1 [get_bd_ports PL_pin_K16] [get_bd_pins SC0720_0/PL_pin_K16]
