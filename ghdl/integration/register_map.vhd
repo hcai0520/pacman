@@ -26,10 +26,13 @@ package register_map is
   constant C_ADDR_GLOBAL_ENABLES   : integer := 16#20#;
 
   -- Registers with SCOPE=GLOBAL ROLE=TIMING
-  constant C_ADDR_TIMING_STATUS    : integer := 16#00#;
-  constant C_ADDR_TIMING_STAMP     : integer := 16#04#;
-  constant C_ADDR_TIMING_TRIG      : integer := 16#20#;
-  constant C_ADDR_TIMING_SYNC      : integer := 16#24#;
+  constant C_ADDR_TIMING_STATUS            : integer := 16#00#;
+  constant C_ADDR_TIMING_STAMP             : integer := 16#04#;
+  constant C_ADDR_TIMING_TRIG              : integer := 16#20#;
+  constant C_ADDR_TIMING_SYNC              : integer := 16#24#;
+  
+  constant C_ADDR_TIMING_LEMO_A_COUNT      : integer := 16#30#;
+  constant C_ADDR_TIMING_LEMO_B_COUNT      : integer := 16#34#;
 
   -- Registers with SCOPE=UART_RX
 
