@@ -12,11 +12,11 @@ architecture behaviour of external_update_tb is
     port (
      
       UPDATE_E_I	        : in  std_logic;
-      CLK_B_I             : in  std_logic;
+      CLK_F_I             : in  std_logic;
       RSTN                : in  std_logic;
       PULSE_OUT           : out std_logic;
       COUNT_P             : out std_logic_vector(31 downto 0);
-      DEBUG             : out std_logic_vector(7 downto 0)
+      DEBUG               : out std_logic_vector(7 downto 0)
     );
   end component;
   
@@ -33,7 +33,7 @@ architecture behaviour of external_update_tb is
 
   begin
   uut: external_update port map (
-    CLK_B_I  => clk_b,
+    CLK_F_I  => clk_b,
     RSTN     => aresetn,
     UPDATE_E_I => update_e,
     --CONFIG_A_I => x"0008007A",

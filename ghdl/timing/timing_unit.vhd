@@ -9,10 +9,10 @@ entity timing_unit is
   port (
     ACLK                 : in std_logic; -- fast clock
     ARESETN              : in std_logic;
-    UCLK_I               : in std_logic; -- slow clock
+    UCLK                 : in std_logic; -- slow clock
 
 
-    --lemo in
+    --lemo signal
     LEMO_A                : in std_logic;
     LEMO_B                : in std_logic;
 
@@ -28,76 +28,123 @@ entity timing_unit is
 
     TIMESTAMP_O           : out std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0);
     GLB_CLK_O             : out std_logic;
-    TRIG_O                : out std_logic_vector(C_NUM_TILE-1 downto 0);
-    SYNC_O                : out std_logic_vector(C_NUM_TILE-1 downto 0)
+    G_O                   : out std_logic_vector(C_NUM_TILE-1 downto 0);
+    H_O                   : out std_logic_vector(C_NUM_TILE-1 downto 0);
+    TS_SYNC               : out std_logic;
+
+    DEBUG                : out std_logic_vector(7 downto 0)
   );
 end timing_unit;
 
 architecture behaviour of timing_unit is
   component timing_registers is
     port (
-      ACLK	                 : in std_logic;
-      ARESETN	               : in std_logic;
+    ACLK	                 : in std_logic;
+    ARESETN	               : in std_logic;
 
-      S_REGBUS_RB_RADDR	     : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
-      S_REGBUS_RB_RDATA	     : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-      S_REGBUS_RB_RUPDATE    : in  std_logic;
-      S_REGBUS_RB_RACK       : out std_logic;
+    S_REGBUS_RB_RUPDATE    : in  std_logic;
+    S_REGBUS_RB_RADDR	     : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
+    S_REGBUS_RB_RDATA	     : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);      
+    S_REGBUS_RB_RACK       : out std_logic;
+    
+    S_REGBUS_RB_WUPDATE    : in  std_logic;
+    S_REGBUS_RB_WADDR	     : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
+    S_REGBUS_RB_WDATA	     : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    S_REGBUS_RB_WACK       : out std_logic;
 
-      S_REGBUS_RB_WUPDATE    : in  std_logic;
-      S_REGBUS_RB_WADDR	     : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
-      S_REGBUS_RB_WDATA	     : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-      S_REGBUS_RB_WACK       : out std_logic;
+    ATC_POKE_C             : out std_logic;
+    ATC_POKE_D             : out std_logic;
+    ATC_CONFIG_G           : out ATC_array := (others => (others => '0'));
+    ATC_CONFIG_H           : out ATC_array := (others => (others => '0'));
+    ATC_CONFIG_TS          : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
 
-      TRIG_UPDATE_O          : out std_logic;
-      TRIG_CONFIG_O          : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-      TRIG_BUSY_I            : in std_logic;
+    ATC_POLARITY           : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
 
-      SYNC_UPDATE_O          : out std_logic;
-      SYNC_CONFIG_O          : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-      SYNC_BUSY_I            : in std_logic;
+    STATUS_I               : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    TIMESTAMP_I            : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);   
 
-      STATUS_I               : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-      TIMESTAMP_I            : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    LEMO_A_COUNT           : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    LEMO_B_COUNT           : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
 
-      LEMO_A_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-      LEMO_B_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)    
-      );
+    --count of input in slow domain
+    LEMO_A_COUNT_S         : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    LEMO_B_COUNT_S         : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    POKE_C_COUNT_S         : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    POKE_D_COUNT_S         : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+
+    --count of output
+    ATC_G_COUNT           :  in  ATC_array;
+    ATC_H_COUNT           :  in  ATC_array;
+    ATC_TS_COUNT          :  in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)   
+    );
+  end component;
+ 
+  component atc_mux is
+    generic (
+      constant C_CONFIG_WIDTH : integer := C_RB_DATA_WIDTH
+    );
+    port (
+    UCLK	               : in  std_logic;
+    RSTN	               : in  std_logic;
+
+
+    --input signal
+    UPDATE_LEMO_A_I	        : in  std_logic;
+    UPDATE_LEMO_B_I	        : in  std_logic;
+    UPDATE_POKE_C_I	        : in  std_logic;
+    UPDATE_POKE_D_I	        : in  std_logic;
+
+
+    --config of output (10 for G, 10 for H and 1 for timestamp)
+    ATC_CONFIG_G            : in ATC_array := (others => (others => '0'));
+    ATC_CONFIG_H            : in ATC_array := (others => (others => '0'));
+    ATC_CONFIG_TS           : in std_logic_vector(C_CONFIG_WIDTH-1 downto 0);
+
+    --output
+    ATC_G_O                 : out std_logic_vector(9 downto 0) := (others => '0');
+    ATC_H_O                 : out std_logic_vector(9 downto 0) := (others => '0');
+    TS_SYNC                 : out std_logic;
+
+    ATC_G_COUNT             :  out  ATC_array;
+    ATC_H_COUNT             :  out  ATC_array;
+    ATC_TS_COUNT            :  out  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+   
+
+    DEBUG_O                 : out std_logic_vector(7 downto 0)
+
+
+    );
   end component;
 
-
   component external_update is
-    port (
-     
+    port (     
       UPDATE_E_I	        : in  std_logic;
-      CLK_B_I             : in  std_logic;
+      CLK_F_I             : in  std_logic;
       RSTN                : in  std_logic;
       PULSE_OUT           : out std_logic;
       COUNT_P             : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
       DEBUG               : out std_logic_vector(7 downto 0)
     );
   end component;
+  
+ 
 
-  component slow_broadcast is
+  component slow_pulse is
     generic (
-      constant C_ACTIVE : std_logic := '1';
-      constant C_BROADCAST_WIDTH : integer := C_NUM_TILE;
       constant C_CONFIG_WIDTH : integer := C_RB_DATA_WIDTH
     );
     port (
-      -- Clock Domain A: (Fast Clock)
-      CLK_A_I	            : in  std_logic;
-      RSTN_A_I	          : in  std_logic;
-      UPDATE_A_I	        : in  std_logic;
-      CONFIG_A_I          : in  std_logic_vector(C_CONFIG_WIDTH-1 downto 0);
-      BUSY_A_O	          : out std_logic;
-
-      -- Clock Domain B: (Slow Clock)
-      CLK_B_I             : in  std_logic;
-      BROADCAST_B_O       : out std_logic_vector(C_BROADCAST_WIDTH-1 downto 0);
-      SINGLE_B_O          : out std_logic;
-
-      DEBUG_O             : out std_logic_vector(7 downto 0)
+    -- Fast Clock Domain :
+    CLK_F_I	                : in  std_logic;
+    RSTN_F_I	              : in  std_logic;
+    UPDATE_I	              : in  std_logic;
+    BUSY_F_O	              : out std_logic;
+    CONFIG_POL              : in  std_logic :='0';
+    -- Slow Clock Domain : 
+    CLK_S_I                 : in  std_logic;
+    PULSE_O                 : out std_logic;
+    DEBUG_O                 : out std_logic_vector(7 downto 0);
+    COUNT_O                 : out std_logic_vector(31 downto 0)
     );
   end component;
 
@@ -120,42 +167,61 @@ architecture behaviour of timing_unit is
 
   signal clk            : std_logic;
   signal rst            : std_logic;
-  signal trig_update    : std_logic;
-  signal trig_config    : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-  signal trig_busy      : std_logic;
-  signal sync_update    : std_logic;
-  signal sync_config    : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-  signal sync_busy      : std_logic;
   signal uresetn        : std_logic;
-
   signal tstamp         : std_logic_vector(C_TIMESTAMP_WIDTH-1 downto 0);
   signal status         : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');  
 
-  signal trig_lemo_update   : std_logic;
-  signal sync_lemo_update   : std_logic;
-  signal trig_lemo_mux      : std_logic;
-  signal sync_lemo_mux      : std_logic;
+ --input signal and cfg
+  signal atc_ts_cfg     :  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+  signal atc_g_cfg      :  ATC_array  ;
+  signal atc_h_cfg      :  ATC_array  ;
+  signal polarity_cfg   : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) ;
+ 
+  --fast domain
+  signal lemo_a_f         : std_logic; 
+  signal lemo_b_f         : std_logic;
+  signal poke_c_f         : std_logic;
+  signal poke_d_f         : std_logic;
 
-  signal lemo_a_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-  signal lemo_b_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+  --slow domain
+  signal lemo_a_s         : std_logic; 
+  signal lemo_b_s         : std_logic;
+  signal poke_c_s         : std_logic;
+  signal poke_d_s         : std_logic;
+
+
+
+
+--output and cfg
+  signal   atc_h         :  std_logic_vector(9 downto 0) := (others => '0'); 
+  signal   atc_g         :  std_logic_vector(9 downto 0) := (others => '0'); 
+  signal   ts_sy         :  std_logic;
+
+ -- input count
+  signal lemo_a_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0); -- count lemo_a input origin
+  signal lemo_b_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0); -- count lemo_b input origin
+
+-- counter of input in slow domain
+  signal count_a_s      : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+  signal count_b_s      : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+  signal count_c_s      : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+  signal count_d_s      : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+
+  signal atc_g_c     : ATC_array;
+  signal atc_h_c     : ATC_array;
+  signal atc_ts_c    : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
+
 
 begin
 
   TIMESTAMP_O <= tstamp;
-  GLB_CLK_O <= UCLK_I;
+  GLB_CLK_O <= UCLK;
   rst <= not ARESETN;
   clk <= ACLK;
-  process(clk, rst)
-  begin
-    if (rst='1') then
-      status <= (others => '0');
-    elsif (rising_edge(clk)) then
-      status(0) <= sync_busy;
-      status(1) <= trig_busy;
-      status(4) <= uresetn;
-    end if;
-  end process;
-  
+  DEBUG(0) <= lemo_b_f;
+  DEBUG(1) <= lemo_b_s;
+  DEBUG(7 downto 2) <= (others => '0');  
+
   uut0: timing_registers port map (
     ACLK                => ACLK,   
     ARESETN             => ARESETN,
@@ -167,74 +233,114 @@ begin
     S_REGBUS_RB_WADDR   => S_REGBUS_RB_WADDR,   
     S_REGBUS_RB_WDATA   => S_REGBUS_RB_WDATA,   
     S_REGBUS_RB_WACK    => S_REGBUS_RB_WACK,
-    TRIG_UPDATE_O       => trig_update,      
-    TRIG_CONFIG_O       => trig_config,
-    TRIG_BUSY_I         => trig_busy,
-    SYNC_UPDATE_O       => sync_update,
-    SYNC_CONFIG_O       => sync_config,
-    SYNC_BUSY_I         => sync_busy,
+
+    ATC_POKE_C          => poke_c_f ,      
+    ATC_POKE_D          => poke_d_f,
+    ATC_CONFIG_G        => atc_g_cfg,
+    ATC_CONFIG_H        => atc_h_cfg,
+    ATC_CONFIG_TS       => atc_ts_cfg,
+    ATC_POLARITY        => polarity_cfg,
     STATUS_I            => status,
     TIMESTAMP_I         => tstamp,
     LEMO_A_COUNT        => lemo_a_c,
-    LEMO_B_COUNT        => lemo_b_c
+    LEMO_B_COUNT        => lemo_b_c,
+    LEMO_A_COUNT_S      => count_a_s,
+    LEMO_B_COUNT_S      => count_b_s,
+    POKE_C_COUNT_S      => count_c_s,
+    POKE_D_COUNT_S      => count_d_s,
+    ATC_G_COUNT         => atc_g_c, 
+    ATC_H_COUNT         => atc_h_c,  
+    ATC_TS_COUNT        => atc_ts_c
 
+  );
+
+  lemo_a_fast: external_update port map(
+      UPDATE_E_I	=> LEMO_A,
+      CLK_F_I     => ACLK,
+      RSTN        => ARESETN,
+      COUNT_P     => lemo_a_c,     
+      PULSE_OUT  =>  lemo_a_f
+  );
+  lemo_b_fast: external_update port map(
+      UPDATE_E_I	=> LEMO_B,
+      CLK_F_I     => ACLK,
+      RSTN        => ARESETN,
+      COUNT_P     => lemo_b_c,     
+      PULSE_OUT  =>  lemo_b_f
   );
  
-  trig_lemo: external_update port map(
-      UPDATE_E_I	=> LEMO_A,
-      CLK_B_I     => ACLK,
-      RSTN       => ARESETN,
-      COUNT_P     =>  lemo_a_c,     
-      PULSE_OUT  => trig_lemo_update
+
+  lemo_a_ts: slow_pulse port map(
+    CLK_F_I  => ACLK,
+    RSTN_F_I  => ARESETN,
+    UPDATE_I	 => lemo_a_f ,
+    CONFIG_POL => polarity_cfg(0),
+
+    CLK_S_I => uclk,
+    PULSE_O =>lemo_a_s,
+    COUNT_O => count_a_s
   );
+  lemo_b_ts: slow_pulse port map(
+    CLK_F_I  => ACLK,
+    RSTN_F_I  => ARESETN,
+    UPDATE_I	 => lemo_b_f ,
+    CONFIG_POL => polarity_cfg(1),
+
+    CLK_S_I => uclk,
+    PULSE_O =>lemo_b_s,
+    COUNT_O => count_b_s
+  );
+  poke_c_ts: slow_pulse port map(
+    CLK_F_I  => ACLK,
+    RSTN_F_I  => ARESETN,
+    UPDATE_I	 => poke_c_f ,
+    CONFIG_POL => polarity_cfg(2),
+
+    CLK_S_I => uclk,
+    PULSE_O => poke_c_s,
+    COUNT_O => count_c_s
+  );
+  poke_d_ts: slow_pulse port map(
+    CLK_F_I    => ACLK,
+    RSTN_F_I   => ARESETN,
+    UPDATE_I	 => poke_d_f ,
+    CONFIG_POL => polarity_cfg(3),
+
+    CLK_S_I => uclk,
+    PULSE_O => poke_d_s,
+    COUNT_O => count_d_s
+  );
+  output: atc_mux port map (
+    UCLK  => UCLK,
+    RSTN  => ARESETN,
+    UPDATE_LEMO_A_I => lemo_a_s,
+    UPDATE_LEMO_B_I => lemo_b_s,
+    UPDATE_POKE_C_I => poke_c_s,
+    UPDATE_POKE_D_I => poke_d_s,
+
+
+    ATC_CONFIG_G    => atc_g_cfg,      
+    ATC_CONFIG_H    => atc_h_cfg,      
+    ATC_CONFIG_TS   => atc_ts_cfg, 
+
+
+    ATC_G_COUNT     =>   atc_g_c,    
+    ATC_H_COUNT     =>   atc_h_c,    
+    ATC_TS_COUNT    =>   atc_ts_c,   
    
-  trig_lemo_mux <= trig_lemo_update or trig_update;
+    ATC_G_O    => G_O,        
+    ATC_H_O    => H_O,       
+    TS_SYNC    => ts_sy
 
-
-
-  trig0: slow_broadcast port map (
-    CLK_A_I  => ACLK,
-    RSTN_A_I  => ARESETN,
-    UPDATE_A_I => trig_lemo_mux,
-    CONFIG_A_I => trig_config,
-    BUSY_A_O => trig_busy,
-    CLK_B_I => UCLK_I,
-    BROADCAST_B_O => TRIG_O
   );
-
-   sync_lemo: external_update port map(
-      UPDATE_E_I	=> LEMO_B,
-      CLK_B_I     => ACLK,
-      RSTN       => ARESETN,
-      COUNT_P     =>  lemo_b_c,     
-      PULSE_OUT  => sync_lemo_update
-  );
-   sync_lemo_mux <= sync_lemo_update or sync_update;
-
-
-  sync0: slow_broadcast
-    generic map (
-      C_ACTIVE => '0'
-    )
-    port map (
-    CLK_A_I  => ACLK,
-    RSTN_A_I  => ARESETN,
-    UPDATE_A_I => sync_lemo_mux,
-    CONFIG_A_I => sync_config,
-    BUSY_A_O => sync_busy,
-    CLK_B_I => UCLK_I,
-    BROADCAST_B_O => SYNC_O,
-    SINGLE_B_O => uresetn
-  );
-
-  ts0: timestamp port map (
+    ts: timestamp port map (
     CLK_A_I        => ACLK,
-    RSTN_A_I	   => ARESETN,
+    RSTN_A_I	   =>   ARESETN,
     TIMESTAMP_A_O  => tstamp,
-    CLK_B_I        => UCLK_I,
-    RSTN_B_I       => uresetn
+    CLK_B_I        => UCLK,
+    RSTN_B_I       => ts_sy
   );
-
+    
   
 end behaviour;
         
