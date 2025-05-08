@@ -139,7 +139,6 @@ architecture behaviour of timing_unit is
   signal lemo_a_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
   signal lemo_b_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
 
-
 begin
 
   TIMESTAMP_O <= tstamp;
@@ -175,17 +174,21 @@ begin
     SYNC_CONFIG_O       => sync_config,
     SYNC_BUSY_I         => sync_busy,
     STATUS_I            => status,
-    TIMESTAMP_I         => tstamp
+    TIMESTAMP_I         => tstamp,
+    LEMO_A_COUNT        => lemo_a_c,
+    LEMO_B_COUNT        => lemo_b_c
+
   );
  
   trig_lemo: external_update port map(
       UPDATE_E_I	=> LEMO_A,
       CLK_B_I     => ACLK,
       RSTN       => ARESETN,
-      PULSE_OUT  => trig_lemo_up
+      COUNT_P     =>  lemo_a_c,     
+      PULSE_OUT  => trig_lemo_update
   );
    
-  trig_lemo_mux <= trig_lemo_up or trig_update;
+  trig_lemo_mux <= trig_lemo_update or trig_update;
 
 
 
@@ -203,9 +206,10 @@ begin
       UPDATE_E_I	=> LEMO_B,
       CLK_B_I     => ACLK,
       RSTN       => ARESETN,
-      PULSE_OUT  => sync_lemo_up
+      COUNT_P     =>  lemo_b_c,     
+      PULSE_OUT  => sync_lemo_update
   );
-   sync_lemo_mux <= sync_lemo_up or sync_update;
+   sync_lemo_mux <= sync_lemo_update or sync_update;
 
 
   sync0: slow_broadcast

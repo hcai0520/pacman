@@ -15,9 +15,11 @@ architecture behaviour of timing_unit_tb is
     port (
       ACLK                 : in std_logic;
       ARESETN              : in std_logic;
-      UCLK_I               : in  std_logic;    
+      UCLK_I               : in  std_logic;  
+
       LEMO_A                : in std_logic;
       LEMO_B                : in std_logic;
+      
       S_REGBUS_RB_RADDR	 : in  std_logic_vector(C_RB_ADDR_WIDTH-1 downto 0);
       S_REGBUS_RB_RDATA	 : out std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
       S_REGBUS_RB_RUPDATE  : in  std_logic;
@@ -61,9 +63,9 @@ architecture behaviour of timing_unit_tb is
   signal show_output : std_logic := '0';
 begin
   uut0: timing_unit port map (
-    ACLK           => aclk,
-    ARESETN        => aresetn,
-    UCLK_I         => uclk,
+    ACLK                => aclk,
+    ARESETN             => aresetn,
+    UCLK_I              => uclk,
     S_REGBUS_RB_RUPDATE => rupdate,
     S_REGBUS_RB_RADDR   => raddr,
     S_REGBUS_RB_RDATA   => rdata,
@@ -108,7 +110,7 @@ begin
   lemo_a_process : process
   begin   
     lemo_a   <= '0';
-    wait for 800 ns;
+    wait for 100 ns;
     lemo_a  <= '1';
     wait for 10 ns;
     lemo_a   <= '0';
@@ -119,7 +121,7 @@ begin
   begin   
     lemo_b   <= '0';
     wait for 10 ns;
-    lemo_b  <= '0';
+    lemo_b  <= '1';
     wait for 10 ns;
   end process; 
   read_process : process
@@ -136,7 +138,16 @@ begin
     wait for 10 ns;
     raddr   <= x"FE24";
     rupdate <= '1';
-    wait for 10 ns;
+    wait for 100 ns;
+
+    raddr   <= x"FE30";
+    rupdate <= '1';
+    wait for 300 ns;
+
+    raddr   <= x"FE34";
+    rupdate <= '1';
+    wait for 300 ns;
+
     raddr   <= x"0000";
     rupdate <= '0';
     wait for 10 ns;
@@ -153,11 +164,11 @@ begin
     waddr   <= x"FE20";
     wdata   <= x"000103FF";
     wupdate <= '1';
-    wait for 10 ns;
+    wait for 100 ns;
     waddr   <= x"FE24";
     wdata   <= x"000403FF";
     wupdate <= '1';
-    wait for 10 ns;
+    wait for 100 ns;
     waddr   <= x"0000";
     wdata   <= x"00000000";
     wupdate <= '0';

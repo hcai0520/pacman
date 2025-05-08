@@ -52,6 +52,9 @@ architecture behavioral of timing_registers is
 
   signal sync_cfg : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
   signal trig_cfg : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
+
+  signal lemo_a_c : std_logic_vector(31 downto 0) := (others => '0');
+  signal lemo_b_c : std_logic_vector(31 downto 0) := (others => '0');
   
 begin
   -- Clock and reset inputs:
@@ -72,6 +75,9 @@ begin
   TRIG_CONFIG_O <= trig_cfg;
   SYNC_CONFIG_O <= sync_cfg;
   
+
+  lemo_a_c <= LEMO_A_COUNT;
+  lemo_b_c <= LEMO_B_COUNT;
   -- Handle Read Request:
   process(clk, rst)
     variable scope   : integer range 0 to 16#F#;
@@ -101,6 +107,12 @@ begin
             rack  <= '1';
           elsif (reg=C_ADDR_TIMING_SYNC) then
             rdata <= sync_cfg;
+            rack  <= '1';
+          elsif (reg=C_ADDR_TIMING_LEMO_A_COUNT) then
+            rdata <= lemo_a_c;
+            rack  <= '1';
+          elsif (reg=C_ADDR_TIMING_LEMO_B_COUNT) then
+            rdata <= lemo_b_c;
             rack  <= '1';
           end if;
         end if;
@@ -144,4 +156,3 @@ begin
   end process;
   
 end;  
-

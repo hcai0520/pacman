@@ -35,20 +35,10 @@ architecture behaviour of timing_registers_tb is
       SYNC_BUSY_I            : in std_logic;
 
       STATUS_I            : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-<<<<<<< HEAD
-      TIMESTAMP_I         : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)    
-=======
       TIMESTAMP_I         : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
 
       LEMO_A_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
       LEMO_B_COUNT        : in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)     
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> efa1124 (modify data width)
-=======
->>>>>>> efa1124 (modify data width)
-=======
->>>>>>> efa1124 (modify data width)
     );
   end component;
 
@@ -72,13 +62,10 @@ architecture behaviour of timing_registers_tb is
   signal sync_update    : std_logic;
   signal sync_config    : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
 
-<<<<<<< HEAD
-=======
   --lemo_count
   signal lemo_a_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
   signal lemo_b_c       : std_logic_vector(C_RB_DATA_WIDTH-1 downto 0) := (others => '0');
 
->>>>>>> efa1124 (modify data width)
   signal show_output : std_logic := '0';
 begin
   uut0: timing_registers port map (
@@ -99,7 +86,9 @@ begin
     SYNC_CONFIG_O       => sync_config,
     SYNC_BUSY_I         => '1',
     STATUS_I            => x"ABCDEF12",
-    TIMESTAMP_I         => x"0000A435"
+    TIMESTAMP_I         => x"0000A435",
+    LEMO_A_COUNT        => lemo_a_c,
+    LEMO_B_COUNT        => lemo_b_c
   );
 
   aresetn_process : process

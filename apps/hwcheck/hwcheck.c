@@ -95,8 +95,8 @@ void blink(){
 #define C_ADDR_TIMING_TRIG    0x20
 #define C_ADDR_TIMING_SYNC    0x24
 
-//#define C_ADDR_TIMING_LEMO_A_COUNT    0x30
-//#define C_ADDR_TIMING_LEMO_B_COUNT    0x34
+#define C_ADDR_TIMING_LEMO_A_COUNT    0x30
+#define C_ADDR_TIMING_LEMO_B_COUNT    0x34
 
 void check_reg_ro(){
   xil_printf("fw major----------- %d   \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_GLOBAL+C_ADDR_GLOBAL_FW_MAJOR));
@@ -113,6 +113,11 @@ void check_reg_ro(){
   xil_printf("sync config---------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_SYNC));
   xil_printf("\r\n");
   xil_printf("timestamp-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_STAMP));
+
+  xil_printf("\r\n");
+  xil_printf("LEMO_A_COUNT-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_LEMO_A_COUNT));
+  xil_printf("\r\n");
+  xil_printf("LEMO_B_COUNT-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_LEMO_B_COUNT));
 }
 
 
