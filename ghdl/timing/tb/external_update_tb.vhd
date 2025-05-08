@@ -16,7 +16,7 @@ architecture behaviour of external_update_tb is
       RSTN                : in  std_logic;
       PULSE_OUT           : out std_logic;
       COUNT_P             : out std_logic_vector(31 downto 0);
-      DEBUG             : out std_logic_vector(7 downto 0)
+      DEBUG               : out std_logic_vector(7 downto 0)
     );
   end component;
   
