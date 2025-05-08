@@ -6,6 +6,7 @@ package common is
 
   constant C_NUM_TILE          : integer  := 10;
   constant C_NUM_UART          : integer  := 40;
+  
 
   constant C_TIMESTAMP_WIDTH   : integer  := 32;
   
@@ -24,6 +25,10 @@ package common is
   constant C_RX_DATA_WIDTH     : integer  := 2*C_UART_DATA_WIDTH;
   constant C_RX_TURN_MAX       : integer  := 64;
   constant C_RX_BEAT_MAX       : integer  := 32;
+
+
+  --arrays of std_logic_vectors with array length the number of tiles:
+  type ATC_array              is array (0 to C_NUM_TILE-1) of std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
 
   --arrays of std_logic_vectors with array length the number of uart channels:
   type uart_reg_array_t       is array (0 to C_NUM_UART-1) of std_logic_vector (C_RB_DATA_WIDTH-1 downto 0);
