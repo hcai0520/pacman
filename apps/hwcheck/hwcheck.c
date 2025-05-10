@@ -81,7 +81,10 @@ void blink(){
 #define SCOPE_GLOBAL 0xF000
 #define ROLE_GLOBAL  0x0F00
 #define ROLE_TIMING  0x0E00
-
+#define C_SCOPE_TIMING 0xE000
+#define C_TIMING_REGULAR 0x0000
+#define C_TIMING_COUNTER 0x0200
+#define C_TIMING_CFG     0x0400
 #define C_ADDR_GLOBAL_SCRA      0x00
 #define C_ADDR_GLOBAL_SCRB      0x04
 #define C_ADDR_GLOBAL_FW_MAJOR  0x10
@@ -92,11 +95,20 @@ void blink(){
 
 #define C_ADDR_TIMING_STATUS  0x00
 #define C_ADDR_TIMING_STAMP   0x04
-#define C_ADDR_TIMING_TRIG    0x20
-#define C_ADDR_TIMING_SYNC    0x24
+#define C_ADDR_ATC_POKE_C     0x10
+#define C_ADDR_ATC_POKE_D     0x14
 
-#define C_ADDR_TIMING_LEMO_A_COUNT    0x30
-#define C_ADDR_TIMING_LEMO_B_COUNT    0x34
+#define C_ADDR_LEMO_A_F    0x20
+#define C_ADDR_LEMO_B_F    0x24
+#define C_ADDR_LEMO_A_S    0x30
+#define C_ADDR_LEMO_B_S    0x34
+#define C_ADDR_POKE_C_S    0x38
+#define C_ADDR_POKE_D_S    0x3C
+
+#define C_ADDR_ATC_POLARITY  0x40
+#define C_ADDR_ATC_TS        0x44
+#define C_ADDR_G_START       0x50
+#define C_ADDR_H_START       0x80
 
 void check_reg_ro(){
   xil_printf("fw major----------- %d   \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_GLOBAL+C_ADDR_GLOBAL_FW_MAJOR));
@@ -108,16 +120,58 @@ void check_reg_ro(){
   xil_printf("\r\n");
   xil_printf("enables------------ 0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_GLOBAL+C_ADDR_GLOBAL_ENABLES));
   xil_printf("\r\n");
-  xil_printf("timing status-------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_STATUS));
-  xil_printf("trig config---------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_TRIG));
-  xil_printf("sync config---------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_SYNC));
+  xil_printf("timing status-------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_REGULAR+C_ADDR_TIMING_STATUS));
+  //xil_printf("trig config---------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_TRIG));
+  //xil_printf("sync config---------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_SYNC));
   xil_printf("\r\n");
-  xil_printf("timestamp-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_STAMP));
+  xil_printf("timestamp-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_REGULAR+C_ADDR_TIMING_STAMP));
+  xil_printf("\r\n");
+  
+  xil_printf("LEMO_A_COUNT_Fast-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_LEMO_A_F));  
+  xil_printf("LEMO_B_COUNT_Fast-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_LEMO_B_F));
+  xil_printf("LEMO_A_COUNT_Slow-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_LEMO_A_S));  
+  xil_printf("LEMO_B_COUNT_Slow-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_LEMO_B_S));
+  xil_printf("LEMO_C_COUNT_Slow-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_POKE_C_S));  
+  xil_printf("LEMO_D_COUNT_Slow-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_POKE_D_S));
+  xil_printf("TS_OUT_COUNT-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_ATC_TS ));  
+  for (int i =0; i<10; ++i){
+  unsigned addr_offset_g =C_ADDR_G_START + (i*4);
+  unsigned addr_offset_h =C_ADDR_H_START + (i*4);
+  xil_printf("G_OUT_COUNT_%u-----------0x%x \r\n", i,Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+addr_offset_g));  
+  xil_printf("H_OUT_COUNT_%u-----------0x%x \r\n", i,Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+addr_offset_h));  
+  }
+    
+  xil_printf("INPUT_POLARITY_CFG-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_CFG+C_ADDR_ATC_POLARITY  ));    
+  xil_printf("TS_OUT_CFG-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_CFG+C_ADDR_ATC_TS ));  
+  for (int i =0; i<10; ++i){
+  unsigned addr_offset_g =C_ADDR_G_START + (i*4);
+  unsigned addr_offset_h =C_ADDR_H_START + (i*4);
+  xil_printf("G_OUT_CFG_%u-----------0x%x \r\n", i,Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_CFG+addr_offset_g));  
+  xil_printf("H_OUT_CFG_%u-----------0x%x \r\n", i,Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_CFG+addr_offset_h));  
+  }
+  
+}
+void poke_c(){
+  Xil_Out32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_REGULAR+C_ADDR_ATC_POKE_C,0x00000000);
+  xil_printf("poke_c\r\n");
 
-  xil_printf("\r\n");
-  xil_printf("LEMO_A_COUNT-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_LEMO_A_COUNT));
-  xil_printf("\r\n");
-  xil_printf("LEMO_B_COUNT-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+SCOPE_GLOBAL+ROLE_TIMING+C_ADDR_TIMING_LEMO_B_COUNT));
+}
+void poke_d(){
+  Xil_Out32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_REGULAR+C_ADDR_ATC_POKE_D,0x00000000);
+  xil_printf("poke_d\r\n");
+}
+
+void write_cfg(){
+  for (int i =0; i<10; ++i){
+  unsigned addr_offset_g =C_ADDR_G_START + (i*4);
+  unsigned addr_offset_h =C_ADDR_H_START + (i*4);
+  unsigned config_g = (i<<8) | 0x04;
+  unsigned config_h = 0x00000000;
+  Xil_Out32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_CFG+addr_offset_g,config_g);
+  Xil_Out32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_CFG+addr_offset_h,config_h);
+  }
+  Xil_Out32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_CFG+C_ADDR_ATC_POLARITY,0x00000000);
+  Xil_Out32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_CFG+C_ADDR_ATC_TS,0x00000104);
 }
 
 
@@ -134,7 +188,9 @@ int main(){
     xil_printf("choose an option:\r\n");
     xil_printf("(1) blink LEDs \r\n");
     xil_printf("(2) check RO regs \r\n");
-
+    xil_printf("(3) poke c \r\n");
+    xil_printf("(4) poke d \r\n");
+    xil_printf("(5) write config \r\n");
     unsigned char c=inbyte();
     xil_printf("pressed:  %c\n\r", c);
     switch(c){
@@ -143,6 +199,15 @@ int main(){
       break;
     case '2':
       check_reg_ro();
+      break;
+    case '3':
+      poke_c();
+      break;
+    case '4':
+      poke_d();
+      break;
+    case '5':
+      write_cfg();
       break;
     default:
       xil_printf("invalid selection...\n\r");

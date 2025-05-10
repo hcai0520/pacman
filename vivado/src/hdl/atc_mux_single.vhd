@@ -77,8 +77,8 @@ begin
             event_counter  <= event_counter  + 1;
             act := '1';  -- Prevent further counts this activation
           end if;
-      else
-      	act := '0'; 
+      else 
+      	act := '0';
         ATC_OUT <= config(4);
       end if;
     end if;

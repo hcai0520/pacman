@@ -11,7 +11,7 @@ entity external_update is
     UPDATE_E_I	        : in  std_logic;
     
     -- Clock Domain Board: (Fast Clock)
-    CLK_B_I               : in  std_logic;
+    CLK_F_I               : in  std_logic;
     RSTN                  : in  std_logic;
     PULSE_OUT             : out std_logic; -- 1 cycle pulse
     COUNT_P               : out std_logic_vector(31 downto 0); -- pulse counter
@@ -23,7 +23,7 @@ architecture behavioral of external_update is
 
   signal update_e   : std_logic; -- input signal
 
-  signal clk_b      : std_logic; -- clk of board frequency
+  signal clk_f      : std_logic; -- clk of board frequency
   signal rst        : std_logic; 
   signal count      : integer :=0; -- count of pulse
 
@@ -43,7 +43,7 @@ begin
 
   update_e <= UPDATE_E_I;
   
-  clk_b <= CLK_B_I;
+  clk_f <= CLK_F_I;
   rst    <= not RSTN;
 
   
@@ -51,13 +51,13 @@ begin
 
   -- double flop synchronization of update signal 
   -- synchronize request into board domain
-  update_process : process(clk_b, rst)
+  update_process : process(clk_f, rst)
   begin
     if (rst = '1') then
       update_meta <= '1';
       update_sync <= '1';
       update_z  <= '1';
-    elsif (rising_edge(clk_b)) then
+    elsif (rising_edge(clk_f)) then
       update_meta <= update_e; --metastable
       update_sync <= update_meta; --likely stable
       update_z  <= update_sync; -- old signal
@@ -69,11 +69,11 @@ begin
 
   --output occurs when rising edge
 
-  pulse_process : process(clk_b, rst)
+  pulse_process : process(clk_f, rst)
   begin
     if (rst = '1') then
       pulse <= '0';
-    elsif (rising_edge(clk_b)) then
+    elsif (rising_edge(clk_f)) then
       if (update_sync = '1' and update_z = '0') then
         pulse <= '1';
       else
@@ -88,11 +88,11 @@ begin
 
 
   --count the pulse
-  count_process : process(clk_b, rst)
+  count_process : process(clk_f, rst)
   begin
     if (rst = '1') then
       count <= 0;
-    elsif (rising_edge(clk_b)) then
+    elsif (rising_edge(clk_f)) then
       if pulse = '1' then
         if (count = 100000000 -1 ) then
           count <=0;
