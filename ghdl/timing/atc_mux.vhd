@@ -37,7 +37,8 @@ entity atc_mux is
     ATC_G_COUNT             :  out  ATC_array;
     ATC_H_COUNT             :  out  ATC_array;
     ATC_TS_COUNT            :  out  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
-   
+    COUNT_START             : in std_logic := '0';
+    COUNT_RESET             : in std_logic := '0';
     DEBUG_O                 : out std_logic_vector(7 downto 0)
   );
 end;
@@ -59,7 +60,9 @@ architecture behavioral of atc_mux is
 
     --output
     ATC_OUT                 : out std_logic;
-    ATC_COUNT               : out std_logic_vector(C_CONFIG_WIDTH-1 downto 0)
+    ATC_COUNT               : out std_logic_vector(C_CONFIG_WIDTH-1 downto 0);
+    COUNT_START           : in std_logic := '0';
+    COUNT_RESET            : in std_logic := '0'
     );
   end component;
 
@@ -114,7 +117,9 @@ begin
         UPDATE_POKE_D_I => update_poke_d,
         CONFIG_ATC      => config_g(i),
         ATC_OUT         => ATC_G_O(i),
-        ATC_COUNT       => counter_g(i)
+        ATC_COUNT       => counter_g(i),
+        COUNT_START     => COUNT_START,
+        COUNT_RESET     => COUNT_RESET
       );
   end generate;
 
@@ -132,7 +137,9 @@ begin
         UPDATE_POKE_D_I => update_poke_d,
         CONFIG_ATC      => config_h(i),
         ATC_OUT         => ATC_H_O(i),
-        ATC_COUNT       => counter_h(i)
+        ATC_COUNT       => counter_h(i),
+        COUNT_START     => COUNT_START,
+        COUNT_RESET     => COUNT_RESET
       );
   end generate;
   
@@ -148,7 +155,9 @@ begin
       UPDATE_POKE_D_I => update_poke_d,
       CONFIG_ATC      => config_ts,
       ATC_OUT         =>  TS_SYNC,
-      ATC_COUNT       =>  counter_ts
+      ATC_COUNT       =>  counter_ts,
+      COUNT_START     => COUNT_START,
+      COUNT_RESET     => COUNT_RESET
       );
 
  

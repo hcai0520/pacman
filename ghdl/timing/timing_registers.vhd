@@ -44,7 +44,9 @@ entity timing_registers is
     --count of output
     ATC_G_COUNT           :  in  ATC_array;
     ATC_H_COUNT           :  in  ATC_array;
-    ATC_TS_COUNT          :  in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0)
+    ATC_TS_COUNT          :  in  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    COUNT_START           :  out std_logic := '0';
+    COUNT_RESET           :  out std_logic := '0'
     );
 end;
 
@@ -211,9 +213,12 @@ begin
       polarity_cfg <= (others => '0');
       ATC_POKE_C <= '0';
       ATC_POKE_D <= '0';
+      COUNT_START <= '0';
+      COUNT_RESET <= '1';      
     elsif (rising_edge(clk)) then
       ATC_POKE_C <= '0';
       ATC_POKE_D <= '0';
+      COUNT_RESET <= '0';
       wack <= '0';      
       if (wupdate='1') then
         scope := to_integer(unsigned(waddr(15 downto 12)));
@@ -226,6 +231,15 @@ begin
           elsif (reg= C_ADDR_ATC_POKE_D ) then            
             ATC_POKE_D <= '1'; 
             wack  <= '1'; 
+          elsif (reg= C_ADDR_COUNT_START ) then
+            COUNT_START <= '1';         
+            wack  <= '1'; 
+          elsif (reg= C_ADDR_COUNT_STOP ) then             
+            COUNT_START <= '0';
+            wack  <= '1';  
+          elsif (reg= C_ADDR_COUNT_RESET ) then             
+            COUNT_RESET <= '1';
+            wack  <= '1';   
           end if;
         elsif (scope=C_SCOPE_TIMING) and (role=C_TIMING_CFG) then      
           if (reg= C_ADDR_ATC_POLARITY ) then

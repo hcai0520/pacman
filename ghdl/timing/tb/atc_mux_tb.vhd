@@ -42,6 +42,8 @@ architecture behaviour of atc_mux_tb is
     ATC_G_COUNT             :  out  ATC_array;
     ATC_H_COUNT             :  out  ATC_array;
     ATC_TS_COUNT            :  out  std_logic_vector(C_RB_DATA_WIDTH-1 downto 0);
+    COUNT_START             : in std_logic := '0';
+    COUNT_RESET             : in std_logic := '0';
    
     DEBUG_O                 : out std_logic_vector(7 downto 0)
 
@@ -62,7 +64,8 @@ architecture behaviour of atc_mux_tb is
   signal update_g        : std_logic_vector(9 downto 0);
   signal update_h        : std_logic_vector(9 downto 0);
   signal update_ts       : std_logic;
-
+  signal count_s    :std_logic;
+  signal count_r    : std_logic;
   signal   atc_h         :  std_logic_vector(9 downto 0) := (others => '0'); 
   signal   atc_g         :  std_logic_vector(9 downto 0) := (others => '0'); 
   signal   ts_sy         :  std_logic;
@@ -86,7 +89,7 @@ begin
 
     ATC_CONFIG_G    => cfg_g_in,      
     ATC_CONFIG_H    => cfg_h_in,      
-    ATC_CONFIG_TS   => x"00000312",      
+    ATC_CONFIG_TS   => x"00000A12",      
     
     ATC_G_O      => atc_g,        
     ATC_H_O      => atc_h,       
@@ -94,7 +97,8 @@ begin
     ATC_G_COUNT  => counter_g,          
     ATC_H_COUNT  => counter_h,          
     ATC_TS_COUNT => counter_ts,           
-   
+    COUNT_START => count_s,
+    COUNT_RESET => count_r,
     DEBUG_O    => debug
 
   );
@@ -195,11 +199,20 @@ begin
     update_poke_d <= '0';
     wait;
   end process;
-  
+  count_process:process
+  begin
+    wait for 10 ns;
+    count_s <='1';
+    wait for 1050 ns;
+    count_s <='0';
+    wait for 20 ns;
+    count_r <= '1';
+    wait;
+  end process;
   show_process : process
   begin
     show_output <= '1';
-    wait until (count = 20);
+    wait until (count = 200);
     wait for 10 ns;
     show_output <= '0';
     wait;
@@ -232,6 +245,8 @@ begin
       write  (l, atc_h);
       write  (l, String'(" output_ts: "));
       write  (l, ts_sy);
+       write  (l, String'(" count_ts: "));
+      write  (l, counter_ts);
       write  (l, String'(" update_ts: "));
       write  (l, debug(0));
       write  (l, String'(" config_ts: "));

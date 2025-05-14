@@ -33,7 +33,9 @@ architecture behaviour of slow_pulse_tb is
     PULSE_O                 : out std_logic;
     DEBUG_O                 : out std_logic_vector(7 downto 0);
 
-    COUNT_O                 : out std_logic_vector(31 downto 0)
+    COUNT_O                 : out std_logic_vector(31 downto 0);
+    COUNT_START             : in std_logic := '0';
+    COUNT_RESET             : in std_logic := '0'
     );
   end component;
 
@@ -49,6 +51,8 @@ architecture behaviour of slow_pulse_tb is
   signal cout      : std_logic_vector(31 downto 0);
   signal show_output_f : std_logic := '0';
   signal show_output_s : std_logic := '0';
+  signal count_s    :std_logic;
+  signal count_r    : std_logic;
 begin
   uut: slow_pulse port map (
     CLK_F_I  => aclk,
@@ -59,7 +63,9 @@ begin
     CLK_S_I => uclk,
     PULSE_O =>sig_out,
     DEBUG_O => debug,
-    COUNT_O => cout              
+    COUNT_O => cout,
+    COUNT_START => count_s,
+    COUNT_RESET => count_r
   );
 
   --clock A is 10ns period
@@ -94,22 +100,34 @@ begin
     update_in <= '1';
     wait for 10 ns;
     update_in <= '0';
+    wait for 1000 ns;
+    update_in <= '1';
+    wait for 10 ns;
+    update_in <= '0';
     wait;
   end process;
 
-
+  count_process:process
+  begin
+    wait for 10 ns;
+    count_s <='1';
+    wait for 1550 ns;
+    count_s <='0';
+    wait for 20 ns;
+    count_r <= '1';
+    wait;
+  end process;
 
   show_process : process
   begin
     show_output_s <= '1';
     show_output_f <= '0';
-    wait until (count = 41);
+    wait until (count = 10);
     show_output_s <= '0';
     show_output_f <= '1';
-    wait until (count = 45);
+    wait until (count = 170);
     show_output_s <= '1';
     show_output_f <= '0';
-    wait until (count = 90);
     wait for 10 ns;
     show_output_s <= '0';
     show_output_f <= '0';
@@ -190,6 +208,8 @@ begin
       write  (l, debug(3));
       write  (l, String'(" count_out: "));
       write  (l, cout);
+      write  (l, String'(" count_reset: "));
+      write  (l, count_r);
       
       if (aresetn = '0') then
         write (l, String'(" (RESET)"));

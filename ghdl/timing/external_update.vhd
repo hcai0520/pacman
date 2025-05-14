@@ -15,6 +15,8 @@ entity external_update is
     RSTN                  : in  std_logic;
     PULSE_OUT             : out std_logic; -- 1 cycle pulse
     COUNT_P               : out std_logic_vector(31 downto 0); -- pulse counter
+    COUNT_START           : in std_logic := '0';
+    COUNT_RESET           : in std_logic := '0';
     DEBUG                 : out std_logic_vector(7 downto 0) -- update_sync and update old
   );
 end;
@@ -38,7 +40,7 @@ architecture behavioral of external_update is
   
   signal update_z : std_logic ;
   signal pulse      : std_logic :='0'; 
-
+  
 begin
 
   update_e <= UPDATE_E_I;
@@ -92,15 +94,16 @@ begin
   begin
     if (rst = '1') then
       count <= 0;
-    elsif (rising_edge(clk_f)) then
-      if pulse = '1' then
-        if (count = 100000000 -1 ) then
-          count <=0;
+    elsif (rising_edge(clk_f)) then 
+      if COUNT_RESET = '1' then
+        count <= 0;
+      elsif pulse = '1' and COUNT_START = '1' then
+        if count = 100000000 - 1 then
+          count <= 0;
         else
           count <= count + 1;
         end if;
-      end if;  
-        
+      end if;
     end if;
   end process;
 

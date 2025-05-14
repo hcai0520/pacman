@@ -98,6 +98,11 @@ void blink(){
 #define C_ADDR_ATC_POKE_C     0x10
 #define C_ADDR_ATC_POKE_D     0x14
 
+
+#define C_ADDR_COUNT_START    0xB0
+#define C_ADDR_COUNT_STOP     0xB4
+#define C_ADDR_COUNT_RESET    0xB8
+
 #define C_ADDR_LEMO_A_F    0x20
 #define C_ADDR_LEMO_B_F    0x24
 #define C_ADDR_LEMO_A_S    0x30
@@ -131,8 +136,8 @@ void check_reg_ro(){
   xil_printf("LEMO_B_COUNT_Fast-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_LEMO_B_F));
   xil_printf("LEMO_A_COUNT_Slow-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_LEMO_A_S));  
   xil_printf("LEMO_B_COUNT_Slow-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_LEMO_B_S));
-  xil_printf("LEMO_C_COUNT_Slow-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_POKE_C_S));  
-  xil_printf("LEMO_D_COUNT_Slow-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_POKE_D_S));
+  xil_printf("POKE_C_COUNT_Slow-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_POKE_C_S));  
+  xil_printf("POKE_D_COUNT_Slow-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_POKE_D_S));
   xil_printf("TS_OUT_COUNT-----------0x%x \r\n", Xil_In32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_COUNTER+C_ADDR_ATC_TS ));  
   for (int i =0; i<10; ++i){
   unsigned addr_offset_g =C_ADDR_G_START + (i*4);
@@ -161,6 +166,19 @@ void poke_d(){
   xil_printf("poke_d\r\n");
 }
 
+void count_start(){
+  Xil_Out32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_REGULAR+C_ADDR_COUNT_START,0x00000000);
+  xil_printf("Counter start\r\n");
+
+}
+void count_stop(){
+  Xil_Out32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_REGULAR+C_ADDR_COUNT_STOP,0x00000000);
+  xil_printf("Counter stop\r\n");
+}
+void count_reset(){
+  Xil_Out32(ADDR_AXIL_REGS+C_SCOPE_TIMING+C_TIMING_REGULAR+C_ADDR_COUNT_RESET,0x00000000);
+  xil_printf("Counter reset\r\n");
+}
 void write_cfg(){
   for (int i =0; i<10; ++i){
   unsigned addr_offset_g =C_ADDR_G_START + (i*4);
@@ -191,6 +209,9 @@ int main(){
     xil_printf("(3) poke c \r\n");
     xil_printf("(4) poke d \r\n");
     xil_printf("(5) write config \r\n");
+    xil_printf("(6) start counters \r\n");
+    xil_printf("(7) stop counters \r\n");
+    xil_printf("(8) reset counters \r\n");
     unsigned char c=inbyte();
     xil_printf("pressed:  %c\n\r", c);
     switch(c){
@@ -208,6 +229,15 @@ int main(){
       break;
     case '5':
       write_cfg();
+      break;
+    case '6':
+      count_start();
+      break;
+    case '7':
+      count_stop();
+      break;
+    case '8':
+      count_reset();
       break;
     default:
       xil_printf("invalid selection...\n\r");

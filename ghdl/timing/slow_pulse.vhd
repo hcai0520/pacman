@@ -26,7 +26,9 @@ entity slow_pulse is
     DEBUG_O                 : out std_logic_vector(7 downto 0);
 
     --Count Output
-    COUNT_O                 : out std_logic_vector(31 downto 0)
+    COUNT_O                 : out std_logic_vector(31 downto 0);
+    COUNT_START             : in std_logic := '0';
+    COUNT_RESET             : in std_logic := '0'
   );
 end;
 
@@ -45,8 +47,8 @@ architecture behavioral of slow_pulse is
   -- double flopping at clock domain crossing:
   signal request_meta : std_logic; -- metastable
   signal request_sync : std_logic; -- likely stable
-  signal ack_meta : std_logic; -- metastable
-  signal ack_sync : std_logic; -- likely stable
+  signal ack_meta     : std_logic; -- metastable
+  signal ack_sync     : std_logic; -- likely stable
 
   attribute ASYNC_REG : string;
   attribute ASYNC_REG of request_meta: signal is "TRUE";
@@ -54,7 +56,9 @@ architecture behavioral of slow_pulse is
   attribute ASYNC_REG of ack_meta: signal is "TRUE";
   attribute ASYNC_REG of ack_sync: signal is "TRUE";
 
-  signal cout_out       : integer :=0;
+  signal count_out            : integer :=0;
+  signal counter              : integer ;
+
 begin
   clk_f    <= CLK_F_I;
   rst_f    <= not RSTN_F_I;
@@ -94,6 +98,7 @@ begin
       request_sync <= request_meta; --likely stable
     end if;
   end process;
+  
 
   -- fast clock domain  process
   process(clk_f, rst_f)
@@ -127,36 +132,50 @@ begin
 
   -- Slow clock domain process
   process(clk_s, rst_f)
-  variable counter : integer :=0;
   begin
     if (rst_f = '1') then
       PULSE_O <= CONFIG_POL;
       ack <= '0'; 
-      cout_out <= 0 ; 
-      counter :=0;
+      counter <=0;
     elsif (rising_edge(clk_s)) then
       if ((ack='0') and (request_sync='1')) then
         ack <= '1';
-        counter :=1;
+        counter <=1;
       end if;
       if(request_sync = '0') then
         ack <= '0';
       end if; 
-      if (ack = '1' and counter = 1) then 
-        if (cout_out = 10000000 -1 ) then
-          cout_out <=0;
-        else
-          cout_out <= cout_out + 1;
-        end if;
-          PULSE_O <= not CONFIG_POL; 
-          counter := counter - 1;     
+      if (ack = '1' and counter = 1) then
+        PULSE_O <= not CONFIG_POL; 
+        counter <= counter - 1;             
       else
         PULSE_O <= CONFIG_POL;
       end if;
     end if;
   end process;
 
-  COUNT_O <= std_logic_vector(to_signed(cout_out , 32));
+-- counter of output
+process(clk_s, rst_f)
+  begin
+    if (rst_f = '1') then
+      count_out <= 0 ; 
+    elsif (rising_edge(clk_s)) then
+      if COUNT_RESET = '1' then
+        count_out <= 0;
+      else
+        if (COUNT_START = '1') then
+          if (ack = '1' and counter = 1 ) then  
+	    if (count_out = 10000000 -1 ) then
+              count_out <=0;
+            else
+              count_out <= count_out + 1;
+            end if;
+          end if; 
+        end if;  
+      end if; 
+    end if;
+  end process;
+  COUNT_O <= std_logic_vector(to_signed(count_out , 32));
 
 
 

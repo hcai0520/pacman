@@ -37,8 +37,10 @@ package register_map is
   constant C_ADDR_TIMING_STAMP             : integer := 16#04#;
   constant C_ADDR_ATC_POKE_C               : integer := 16#10#;
   constant C_ADDR_ATC_POKE_D               : integer := 16#14#;
-
-
+  CONSTANT C_ADDR_COUNT_START              : integer := 16#B0#;
+  CONSTANT C_ADDR_COUNT_STOP               : integer := 16#B4#;
+  CONSTANT C_ADDR_COUNT_RESET              : integer := 16#B8#;
+ 
   --F(fast clock domain)
   constant C_ADDR_LEMO_A_F                 : integer := 16#20#;
   constant C_ADDR_LEMO_B_F                 : integer := 16#24#;
