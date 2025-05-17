@@ -58,12 +58,12 @@ architecture behavioral of slow_pulse is
 
   signal count_out            : integer :=0;
   signal counter              : integer ;
-
+  signal pulse                : std_logic :='0'; 
 begin
   clk_f    <= CLK_F_I;
   rst_f    <= not RSTN_F_I;
   update_in <= UPDATE_I;
- 
+
 
 
   BUSY_F_O <= busy_f;
@@ -134,10 +134,11 @@ begin
   process(clk_s, rst_f)
   begin
     if (rst_f = '1') then
-      PULSE_O <= CONFIG_POL;
+      pulse <= '0';
       ack <= '0'; 
       counter <=0;
     elsif (rising_edge(clk_s)) then
+      --pulse <= CONFIG_POL;
       if ((ack='0') and (request_sync='1')) then
         ack <= '1';
         counter <=1;
@@ -145,11 +146,13 @@ begin
       if(request_sync = '0') then
         ack <= '0';
       end if; 
-      if (ack = '1' and counter = 1) then
-        PULSE_O <= not CONFIG_POL; 
+      if ( ack ='1' and counter = 1) then
+        pulse <= '1';
+        --pulse <= not CONFIG_POL; 
         counter <= counter - 1;             
       else
-        PULSE_O <= CONFIG_POL;
+        pulse <= '0';
+        --pulse <= CONFIG_POL;
       end if;
     end if;
   end process;
@@ -176,9 +179,7 @@ process(clk_s, rst_f)
     end if;
   end process;
   COUNT_O <= std_logic_vector(to_signed(count_out , 32));
-
-
-
+  PULSE_O <= pulse when CONFIG_POL = '0' else not pulse;
 
 
 

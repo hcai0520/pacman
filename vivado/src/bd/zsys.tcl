@@ -687,8 +687,8 @@ proc create_root_design { parentCell } {
   connect_bd_intf_net -intf_net rx_unit_0_M_AXIS [get_bd_intf_pins rx_unit_0/M_AXIS] [get_bd_intf_pins axis_data_fifo_0/S_AXIS]
 
   # Create port connections
-  connect_bd_net -net LEMO_A_0_1 [get_bd_ports LEMO_A_0] [get_bd_pins timing_unit_0/LEMO_A]
-  connect_bd_net -net LEMO_B_0_1 [get_bd_ports LEMO_B_0] [get_bd_pins timing_unit_0/LEMO_B]
+  connect_bd_net -net LEMO_A_0_1 [get_bd_ports LEMO_A_0] [get_bd_pins timing_unit_0/LEMO_A_I]
+  connect_bd_net -net LEMO_B_0_1 [get_bd_ports LEMO_B_0] [get_bd_pins timing_unit_0/LEMO_B_I]
   connect_bd_net -net PHY_LEDs [get_bd_pins xlconcat_0/dout] [get_bd_pins vio_0/probe_in0]
   connect_bd_net -net PISO_I_0_1 [get_bd_ports PISO_I_0] [get_bd_pins rx_unit_0/PISO_I]
   connect_bd_net -net PL_pin_K16_1 [get_bd_ports PL_pin_K16] [get_bd_pins SC0720_0/PL_pin_K16]
@@ -709,7 +709,7 @@ proc create_root_design { parentCell } {
   connect_bd_net -net global_registers_0_ANALOG_PWR_EN_O [get_bd_pins global_registers_0/ANALOG_PWR_EN_O] [get_bd_ports ANALOG_PWR_EN_O_0]
   connect_bd_net -net global_registers_0_TILE_EN_O [get_bd_pins global_registers_0/TILE_EN_O] [get_bd_ports TILE_EN_O_0]
   connect_bd_net -net processing_system7_0_FCLK_CLK0 [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins ps7_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps7_0_100M/slowest_sync_clk] [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins ps7_0_axi_periph/M00_ACLK] [get_bd_pins ps7_0_axi_periph/ACLK] [get_bd_pins axil_to_regbus_0/S_AXI_ACLK] [get_bd_pins ps7_0_axi_periph/M01_ACLK] [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_mem_intercon/S00_ACLK] [get_bd_pins processing_system7_0/S_AXI_HP0_ACLK] [get_bd_pins axi_mem_intercon/M00_ACLK] [get_bd_pins axi_mem_intercon/ACLK] [get_bd_pins rx_unit_0/M_AXIS_ACLK] [get_bd_pins axi_dma_0/m_axi_s2mm_aclk] [get_bd_pins tx_unit_0/S_AXIS_ACLK] [get_bd_pins vio_0/clk] [get_bd_pins axi_mem_intercon/S01_ACLK] [get_bd_pins axis_data_fifo_0/s_axis_aclk] [get_bd_pins global_registers_0/ACLK] [get_bd_pins regbus_mux_0/ACLK] [get_bd_pins timing_unit_0/ACLK]
-  connect_bd_net -net processing_system7_0_FCLK_CLK1 [get_bd_pins processing_system7_0/FCLK_CLK1] [get_bd_pins tx_unit_0/UCLK_I] [get_bd_pins timing_unit_0/UCLK]
+  connect_bd_net -net processing_system7_0_FCLK_CLK1 [get_bd_pins processing_system7_0/FCLK_CLK1] [get_bd_pins tx_unit_0/UCLK_I] [get_bd_pins timing_unit_0/UCLK_I]
   connect_bd_net -net processing_system7_0_FCLK_RESET0_N [get_bd_pins processing_system7_0/FCLK_RESET0_N] [get_bd_pins rst_ps7_0_100M/ext_reset_in]
   connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn [get_bd_pins rst_ps7_0_100M/peripheral_aresetn] [get_bd_pins ps7_0_axi_periph/S00_ARESETN] [get_bd_pins axi_dma_0/axi_resetn] [get_bd_pins ps7_0_axi_periph/M00_ARESETN] [get_bd_pins ps7_0_axi_periph/ARESETN] [get_bd_pins axil_to_regbus_0/S_AXI_ARESETN] [get_bd_pins ps7_0_axi_periph/M01_ARESETN] [get_bd_pins axi_mem_intercon/S00_ARESETN] [get_bd_pins axi_mem_intercon/M00_ARESETN] [get_bd_pins axi_mem_intercon/ARESETN] [get_bd_pins rx_unit_0/M_AXIS_ARESETN] [get_bd_pins tx_unit_0/S_AXIS_ARESETN] [get_bd_pins axi_mem_intercon/S01_ARESETN] [get_bd_pins axis_data_fifo_0/s_axis_aresetn] [get_bd_pins global_registers_0/ARESETN] [get_bd_pins regbus_mux_0/ARESETN] [get_bd_pins timing_unit_0/ARESETN]
   connect_bd_net -net timing_unit_0_GLB_CLK_O [get_bd_pins timing_unit_0/GLB_CLK_O] [get_bd_ports GLB_CLK_O_0]

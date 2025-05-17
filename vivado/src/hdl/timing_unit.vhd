@@ -330,33 +330,33 @@ begin
       CLK_F_I         => ACLK,
       RSTN            => ARESETN,
       COUNT_P         => lemo_b_c,     
-      PULSE_OUT       =>  lemo_b_f,
+      PULSE_OUT       => lemo_b_f,
       COUNT_START     => start_sync,
       COUNT_RESET     => reset_sync
   );
  
   --input 0f lemo and poke signal (fast to slow)
   lemo_a_ts: slow_pulse port map(
-    CLK_F_I  => ACLK,
-    RSTN_F_I  => ARESETN,
-    UPDATE_I  => lemo_a_f ,
-    CONFIG_POL => polarity_cfg(0),
+    CLK_F_I         => ACLK,
+    RSTN_F_I        => ARESETN,
+    UPDATE_I        => lemo_a_f ,
+    CONFIG_POL      => polarity_cfg(0),
 
-    CLK_S_I => UCLK_I,
-    PULSE_O =>lemo_a_s,
-    COUNT_O => count_a_s,
+    CLK_S_I         => UCLK_I,
+    PULSE_O         => lemo_a_s,
+    COUNT_O         => count_a_s,
     COUNT_START     => start_sync,
     COUNT_RESET     => reset_s
   );
   lemo_b_ts: slow_pulse port map(
-    CLK_F_I  => ACLK,
-    RSTN_F_I  => ARESETN,
-    UPDATE_I  => lemo_b_f ,
-    CONFIG_POL => polarity_cfg(1),
+    CLK_F_I         => ACLK,
+    RSTN_F_I        => ARESETN,
+    UPDATE_I        => lemo_b_f ,
+    CONFIG_POL      => polarity_cfg(1),
 
-    CLK_S_I => UCLK_I,
-    PULSE_O =>lemo_b_s,
-    COUNT_O => count_b_s,
+    CLK_S_I         => UCLK_I,
+    PULSE_O         => lemo_b_s,
+    COUNT_O         => count_b_s,
     COUNT_START     => start_sync,
     COUNT_RESET     => reset_s
   );

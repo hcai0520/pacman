@@ -44,8 +44,9 @@ architecture behavioral of atc_mux_single is
   signal counter         : integer := 0 ; -- length extend of output
   signal update          : std_logic;
 
-  signal config          :  std_logic_vector(C_CONFIG_WIDTH-1 downto 0);
-  signal event_counter   :  integer;
+  signal config          : std_logic_vector(C_CONFIG_WIDTH-1 downto 0);
+  signal event_counter   : integer;
+  signal pulse           : std_logic :='0'; 
 begin
   clk            <= UCLK;
   rst           <= not RSTN;
@@ -62,17 +63,17 @@ begin
   process(clk, rst)    
   begin
     if (rst = '1') then
-      ATC_OUT<= config(4);
+      pulse <= '0';
       counter <= 0;
     elsif (rising_edge(clk)) then
       if (update = '1') then
         counter <= to_integer(unsigned(config(31 downto 8)));  
       end if;  
       if (counter > 0) then
-        ATC_OUT <= not config(4); 
+        pulse <= '1'; 
         counter <= counter -1 ;
       else
-        ATC_OUT <= config(4);
+        pulse <= '0';
       end if;
     end if;
   end process;
@@ -111,7 +112,6 @@ begin
   end process;
 
   ATC_COUNT <= std_logic_vector(to_signed(event_counter , 32));
-
-
+  ATC_OUT <= pulse when config(4) = '0' else not pulse;
 
 end;
